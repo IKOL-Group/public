@@ -14,6 +14,7 @@ dependencies:
   google_fonts: ^2.0.0
   flutter_svg: ^0.19.3
   http: ^0.13.0
+  maps_launcher: ^1.2.2+2
 
 dev_dependencies:
   flutter_test:
@@ -23,5 +24,4 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/usericon.svg
-    - assets/help.svg
+    - assets/
