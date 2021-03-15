@@ -160,33 +160,53 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
 
     return Container(
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Center(
-              child: ClipOval(
-                child: Material(
-                  color: _active
-                      ? Color.fromARGB(255, 244, 47, 35)
-                      : Color.fromARGB(255, 82, 167, 81),
-                  child: InkWell(
-                    onTap: () {
-                      toggleActive();
-                    },
-                    splashColor: _active
-                        ? Color.fromARGB(255, 136, 48, 42)
-                        : kAccentColor,
-                    child: SizedBox(
-                      width: 220,
-                      height: 220,
-                      child: Center(
-                        child: Text(
-                          _active ? "STOP SHARING" : "SHARE LOCATION",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Stack(
+            children: [
+              Center(
+                child: SizedBox(
+                  child: _loading
+                      ? CircularProgressIndicator(
+                          strokeWidth: 10,
+                          semanticsLabel:
+                              "Turning ${_active ? "off" : "on"} location sharing",
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            _active
+                                ? Color.fromARGB(155, 244, 47, 35)
+                                : Color.fromARGB(155, 82, 167, 81),
+                          ),
+                        )
+                      : null,
+                  height: 220.0,
+                  width: 220.0,
+                ),
+              ),
+              Center(
+                child: ClipOval(
+                  child: Material(
+                    color: _active
+                        ? Color.fromARGB(255, 244, 47, 35)
+                        : Color.fromARGB(255, 82, 167, 81),
+                    child: InkWell(
+                      onTap: () {
+                        toggleActive();
+                      },
+                      splashColor: _active
+                          ? Color.fromARGB(255, 136, 48, 42)
+                          : kAccentColor,
+                      child: SizedBox(
+                        width: 220,
+                        height: 220,
+                        child: Center(
+                          child: Text(
+                            _active ? "STOP SHARING" : "SHARE LOCATION",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
@@ -194,20 +214,9 @@ class _HomeWidgetState extends State<HomeWidget> {
                   ),
                 ),
               ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(top: 30),
-            ),
-            _loading
-                ? CircularProgressIndicator(
-                    semanticsLabel:
-                        "Turning ${_active ? "off" : "on"} location sharing",
-                  )
-                : Container(
-                    height: _kMinCircularProgressIndicatorSize,
-                  ),
-          ],
-        ),
+            ],
+          ),
+        ],
       ),
     );
   }
