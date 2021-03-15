@@ -89,7 +89,7 @@ class HomeWidget extends StatefulWidget {
 }
 
 class _HomeWidgetState extends State<HomeWidget> {
-  var _active = false;
+  bool _active;
   String _error;
   var _loading = false;
 
@@ -109,6 +109,30 @@ class _HomeWidgetState extends State<HomeWidget> {
         ),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    asyncInitState();
+    super.initState();
+  }
+
+  void asyncInitState() async {
+    setState(() {
+      _loading = true;
+    });
+    final uinfo = await APIMethods.getUserInfo();
+    var success = uinfo[0];
+    var error = uinfo[1];
+    var active = uinfo[2];
+    setState(() {
+      if (success) {
+        _active = active;
+      } else {
+        _error = error;
+      }
+      _loading = false;
+    });
   }
 
   @override
@@ -166,12 +190,15 @@ class _HomeWidgetState extends State<HomeWidget> {
                   child: _loading
                       ? CircularProgressIndicator(
                           strokeWidth: 10,
-                          semanticsLabel:
-                              "Turning ${_active ? "off" : "on"} location sharing",
+                          semanticsLabel: _active == null
+                              ? "Checking share location state"
+                              : "Turning ${_active ? "off" : "on"} location sharing",
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            _active
-                                ? Color.fromARGB(155, 244, 47, 35)
-                                : Color.fromARGB(155, 82, 167, 81),
+                            _active == null
+                                ? Color.fromARGB(155, 123, 123, 123)
+                                : _active
+                                    ? Color.fromARGB(155, 244, 47, 35)
+                                    : Color.fromARGB(155, 82, 167, 81),
                           ),
                         )
                       : null,
@@ -180,39 +207,51 @@ class _HomeWidgetState extends State<HomeWidget> {
                 ),
               ),
               Center(
-                child: ClipOval(
-                  child: Material(
-                    color: _active
-                        ? Color.fromARGB(255, 244, 47, 35)
-                        : Color.fromARGB(255, 82, 167, 81),
-                    child: InkWell(
-                      onTap: () {
-                        toggleActive();
-                      },
-                      splashColor: _active
-                          ? Color.fromARGB(255, 136, 48, 42)
-                          : kAccentColor,
-                      child: SizedBox(
-                        width: 220,
-                        height: 220,
-                        child: Center(
-                          child: Text(
-                            _active ? "STOP SHARING" : "SHARE LOCATION",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                child: buildShareOption(),
               ),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  ClipOval buildShareOption() {
+    return ClipOval(
+      child: Material(
+        color: (_active == null)
+            ? Color.fromARGB(255, 123, 123, 123)
+            : _active
+                ? Color.fromARGB(255, 244, 47, 35)
+                : Color.fromARGB(255, 82, 167, 81),
+        child: InkWell(
+          onTap: () {
+            toggleActive();
+          },
+          splashColor: _active == null
+              ? Color.fromARGB(255, 123, 123, 123)
+              : _active
+                  ? Color.fromARGB(255, 136, 48, 42)
+                  : kAccentColor,
+          child: SizedBox(
+            width: 220,
+            height: 220,
+            child: Center(
+              child: Text(
+                _active == null
+                    ? "SHARE LOCATION"
+                    : _active
+                        ? "STOP SHARING"
+                        : "SHARE LOCATION",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
