@@ -124,9 +124,9 @@ class _HomeWidgetState extends State<HomeWidget> {
     final uinfo = await APIMethods.getUserInfo();
     var success = uinfo[0];
     var error = uinfo[1];
-    var active = uinfo[2];
     setState(() {
       if (success) {
+        var active = uinfo[2];
         _active = active;
       } else {
         _error = error;
@@ -143,7 +143,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   void toggleActive() {
     _error = null;
-    if (_loading) return;
+    if (_loading || _active == null) return;
     // https://stackoverflow.com/a/52930197/8608146
     if (_debounce?.isActive ?? false) _debounce.cancel();
 
@@ -219,7 +219,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   ClipOval buildShareOption() {
     return ClipOval(
       child: Material(
-        color: (_active == null)
+        color: _active == null
             ? Color.fromARGB(255, 123, 123, 123)
             : _active
                 ? Color.fromARGB(255, 244, 47, 35)
