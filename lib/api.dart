@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:http/http.dart' as http;
 import 'package:public_app/http/code.dart';
 
 const String BaseURL = 'http://192.168.0.101:3000';
@@ -17,8 +16,8 @@ class APIMethods {
       final body = jsonEncode({'active': active});
       final request = await client.put(uri.host, uri.port, uri.path);
       request.headers.contentType = ContentType.json;
-      request.write(body);
       request.headers.contentLength = body.length;
+      request.write(body);
 
       final resp = await request.close();
       // TODO https://github.com/jogboms/flutter_offline
@@ -44,6 +43,8 @@ class APIMethods {
     } on TimeoutException catch (e) {
       // TODO this exception is not being thrown when timedout
       print(e);
+      // TODO sentry
+      return [false, "Unexpected Error occurred, try again"];
     } on SocketException catch (e) {
       if (e.osError != null) {
         return [false, "You are offline"];

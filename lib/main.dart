@@ -27,28 +27,24 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
+class MyHomePage extends StatelessWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  // ...
-  // methods
-
-  @override
   Widget build(BuildContext context) {
     var textStyle = TextStyle(
+      // fontWeight: FontWeight.bold,
       color: Color.fromARGB(255, 91, 175, 110),
     );
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'Hey Lokendar!',
-          style: GoogleFonts.poppins(textStyle: textStyle),
+          style: GoogleFonts.poppins(
+            textStyle: textStyle,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         actions: [
           IconButton(
@@ -122,6 +118,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   void toggleActive() {
+    _error = null;
     if (_loading) return;
     // https://stackoverflow.com/a/52930197/8608146
     if (_debounce?.isActive ?? false) _debounce.cancel();
@@ -140,7 +137,6 @@ class _HomeWidgetState extends State<HomeWidget> {
           final bool active = _x[2];
           _active = active;
           // remove any previous error
-          _error = null;
         } else {
           _error = error;
         }
