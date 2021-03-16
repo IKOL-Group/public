@@ -26,13 +26,13 @@ import org.ikol.public_app.R
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     lateinit var mGoogleMap: GoogleMap
-    var mapFrag: SupportMapFragment? = null
-    lateinit var mLocationRequest: LocationRequest
-    var mLastLocation: Location? = null
+    private var mapFrag: SupportMapFragment? = null
+    private lateinit var mLocationRequest: LocationRequest
+    private var mLastLocation: Location? = null
     internal var mCurrLocationMarker: Marker? = null
-     var mFusedLocationClient: FusedLocationProviderClient? = null
+    private var mFusedLocationClient: FusedLocationProviderClient? = null
 
-     private var mLocationCallback: LocationCallback = object : LocationCallback() {
+    private var mLocationCallback: LocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             val locationList = locationResult.locations
             if (locationList.isNotEmpty()) {
@@ -81,7 +81,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mGoogleMap = googleMap
         mGoogleMap.mapType = GoogleMap.MAP_TYPE_HYBRID
 
-        mLocationRequest = LocationRequest()
+        mLocationRequest = LocationRequest.create()
         mLocationRequest.interval = 120000 // two minute interval
         mLocationRequest.fastestInterval = 120000
         mLocationRequest.priority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
@@ -93,14 +93,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     ) == PackageManager.PERMISSION_GRANTED
             ) {
                 //Location Permission already granted
-                mFusedLocationClient?.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper())
+                mFusedLocationClient?.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper()!!)
                 mGoogleMap.isMyLocationEnabled = true
             } else {
                 //Request Location Permission
                 checkLocationPermission()
             }
         } else {
-            mFusedLocationClient?.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper())
+            mFusedLocationClient?.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper()!!)
             mGoogleMap.isMyLocationEnabled = true
         }
     }
@@ -168,9 +168,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         mFusedLocationClient?.requestLocationUpdates(
                                 mLocationRequest,
                                 mLocationCallback,
-                                Looper.myLooper()
+                                Looper.myLooper()!!
                         )
-                        mGoogleMap.setMyLocationEnabled(true)
+                        mGoogleMap.isMyLocationEnabled = true
                     }
 
                 } else {
@@ -186,6 +186,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     companion object {
-        val MY_PERMISSIONS_REQUEST_LOCATION = 99
+        const val MY_PERMISSIONS_REQUEST_LOCATION = 99
     }
 }
