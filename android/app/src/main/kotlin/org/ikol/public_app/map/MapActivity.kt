@@ -1,6 +1,9 @@
 package org.ikol.public_app.map
 
 import android.Manifest
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Build
@@ -8,6 +11,7 @@ import android.os.Bundle
 import android.os.Looper
 import android.util.Log
 import android.widget.Toast
+import androidx.annotation.NonNull
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -21,11 +25,13 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import org.ikol.public_app.LocationUpdateService
 import org.ikol.public_app.R
+
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
-    lateinit var mGoogleMap: GoogleMap
+    private lateinit var mGoogleMap: GoogleMap
     private var mapFrag: SupportMapFragment? = null
     private lateinit var mLocationRequest: LocationRequest
     private var mLastLocation: Location? = null
@@ -40,9 +46,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 val location = locationList.last()
                 Log.i("MapsActivity", "Location: " + location.latitude + " " + location.longitude)
                 mLastLocation = location
-                if (mCurrLocationMarker != null) {
-                    mCurrLocationMarker?.remove()
-                }
+                mCurrLocationMarker?.remove()
 
                 //Place current location marker
                 val latLng = LatLng(location.latitude, location.longitude)
@@ -70,21 +74,21 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mapFrag?.getMapAsync(this)
     }
 
-    public override fun onPause() {
-        super.onPause()
-
-        //stop location updates when Activity is no longer active
-        mFusedLocationClient?.removeLocationUpdates(mLocationCallback)
-    }
+//    public override fun onPause() {
+//        super.onPause()
+//
+//        //stop location updates when Activity is no longer active
+//        mFusedLocationClient?.removeLocationUpdates(mLocationCallback)
+//    }
 
     override fun onMapReady(googleMap: GoogleMap) {
         mGoogleMap = googleMap
         mGoogleMap.mapType = GoogleMap.MAP_TYPE_HYBRID
 
         mLocationRequest = LocationRequest.create()
-        mLocationRequest.interval = 120000 // two minute interval
-        mLocationRequest.fastestInterval = 120000
-        mLocationRequest.priority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
+        mLocationRequest.interval = 8 * 1000 // two minute interval
+        mLocationRequest.fastestInterval = 8 * 1000
+        mLocationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(
@@ -93,17 +97,27 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     ) == PackageManager.PERMISSION_GRANTED
             ) {
                 //Location Permission already granted
-                mFusedLocationClient?.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper()!!)
+                mFusedLocationClient?.requestLocationUpdates(mLocationRequest, createLocationServiceIntent(this))
+//                mFusedLocationClient?.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper()!!)
                 mGoogleMap.isMyLocationEnabled = true
             } else {
                 //Request Location Permission
                 checkLocationPermission()
             }
         } else {
-            mFusedLocationClient?.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper()!!)
+            mFusedLocationClient?.requestLocationUpdates(mLocationRequest, createLocationServiceIntent(this))
+//            mFusedLocationClient?.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper()!!)
             mGoogleMap.isMyLocationEnabled = true
         }
     }
+
+    @NonNull
+    private fun createLocationServiceIntent(@NonNull context: Context): PendingIntent {
+        val intent = Intent(context, LocationUpdateService::class.java)
+        intent.action = LocationUpdateService.ACTION_HANDLE_LOCATION
+        return PendingIntent.getService(context, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+    }
+
 
     private fun checkLocationPermission() {
         if (ActivityCompat.checkSelfPermission(
@@ -135,8 +149,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         }
                         .create()
                         .show()
-
-
             } else {
                 // No explanation needed, we can request the permission.
                 ActivityCompat.requestPermissions(
@@ -165,11 +177,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                             ) == PackageManager.PERMISSION_GRANTED
                     ) {
 
-                        mFusedLocationClient?.requestLocationUpdates(
-                                mLocationRequest,
-                                mLocationCallback,
-                                Looper.myLooper()!!
-                        )
+//                        mFusedLocationClient?.requestLocationUpdates(
+//                                mLocationRequest,
+//                                mLocationCallback,
+//                                Looper.myLooper()!!
+//                        )
+                        mFusedLocationClient?.requestLocationUpdates(mLocationRequest, createLocationServiceIntent(this))
                         mGoogleMap.isMyLocationEnabled = true
                     }
 

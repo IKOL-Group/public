@@ -30,31 +30,38 @@ class LocationUpdateService : IntentService(TAG) {
         }
         val locationResult = LocationResult.extractResult(intent)
 
+        // TODO send to server using a blocking request.
+        Log.d(TAG, locationResult.toString())
         log(TAG, locationResult.toString())
 
-        // TODO send to server using a blocking request.
         // Remember that this is the background thread already
     }
 
-    fun log(tag: String, message: String) {
-        var reqParam = URLEncoder.encode("tag", "UTF-8") + "=" + URLEncoder.encode(tag, "UTF-8")
-        reqParam += "&" + URLEncoder.encode("message", "UTF-8") + "=" + URLEncoder.encode(message, "UTF-8")
-        val mURL = URL("http://192.168.0.101:8080/")
+    private fun log(tag: String, message: String) {
+        val thread = Thread {
+            try {
+                var reqParam = URLEncoder.encode("tag", "UTF-8") + "=" + URLEncoder.encode(tag, "UTF-8")
+                reqParam += "&" + URLEncoder.encode("message", "UTF-8") + "=" + URLEncoder.encode(message, "UTF-8")
+                val mURL = URL("http://192.168.0.101:8080/")
 
-        with(mURL.openConnection() as HttpURLConnection) {
-            // optional default is GET
-            requestMethod = "POST"
+                with(mURL.openConnection() as HttpURLConnection) {
+                    // optional default is GET
+                    requestMethod = "POST"
 
-            val wr = OutputStreamWriter(outputStream)
-            wr.write(reqParam)
-            wr.flush()
+                    val wr = OutputStreamWriter(outputStream)
+                    wr.write(reqParam)
+                    wr.flush()
 
-            println("URL : $url")
-            println("Response Code : $responseCode")
+                    println("URL : $url")
+                    println("Response Code : $responseCode")
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
 
+        thread.start()
     }
-
 
     companion object {
         private const val TAG = "LocationUpdateService"
