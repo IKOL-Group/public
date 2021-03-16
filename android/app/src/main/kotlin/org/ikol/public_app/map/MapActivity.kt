@@ -5,10 +5,8 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.Location
 import android.os.Build
 import android.os.Bundle
-import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.annotation.NonNull
@@ -17,14 +15,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.*
-import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
 import org.ikol.public_app.LocationUpdateService
 import org.ikol.public_app.R
 
@@ -34,39 +27,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mGoogleMap: GoogleMap
     private var mapFrag: SupportMapFragment? = null
     private lateinit var mLocationRequest: LocationRequest
-    private var mLastLocation: Location? = null
-    internal var mCurrLocationMarker: Marker? = null
     private var mFusedLocationClient: FusedLocationProviderClient? = null
-
-    private var mLocationCallback: LocationCallback = object : LocationCallback() {
-        override fun onLocationResult(locationResult: LocationResult) {
-            val locationList = locationResult.locations
-            if (locationList.isNotEmpty()) {
-                //The last location in the list is the newest
-                val location = locationList.last()
-                Log.i("MapsActivity", "Location: " + location.latitude + " " + location.longitude)
-                mLastLocation = location
-                mCurrLocationMarker?.remove()
-
-                //Place current location marker
-                val latLng = LatLng(location.latitude, location.longitude)
-                val markerOptions = MarkerOptions()
-                markerOptions.position(latLng)
-                markerOptions.title("Current Position")
-                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA))
-                mCurrLocationMarker = mGoogleMap.addMarker(markerOptions)
-
-                //move map camera
-                mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 11.0F))
-            }
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_maps)
 
-        supportActionBar?.title = "Map Location Activity"
+        supportActionBar?.hide()
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
@@ -83,7 +50,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mGoogleMap = googleMap
-        mGoogleMap.mapType = GoogleMap.MAP_TYPE_HYBRID
 
         mLocationRequest = LocationRequest.create()
         mLocationRequest.interval = 8 * 1000 // two minute interval
@@ -140,22 +106,39 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         .setPositiveButton(
                                 "OK"
                         ) { _, _ ->
+                            Log.d("TAG", Build.VERSION.SDK_INT.toString())
                             //Prompt the user once explanation has been shown
-                            ActivityCompat.requestPermissions(
-                                    this@MapsActivity,
-                                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                                    MY_PERMISSIONS_REQUEST_LOCATION
-                            )
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                                ActivityCompat.requestPermissions(
+                                        this@MapsActivity,
+                                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+                                        FINE_BACKGROUND_LOCATION_ACCESS_REQUEST_CODE
+                                )
+                            } else {
+                                ActivityCompat.requestPermissions(
+                                        this@MapsActivity,
+                                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                                        FINE_LOCATION_ACCESS_REQUEST_CODE
+                                )
+                            }
                         }
                         .create()
                         .show()
             } else {
                 // No explanation needed, we can request the permission.
-                ActivityCompat.requestPermissions(
-                        this,
-                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                        MY_PERMISSIONS_REQUEST_LOCATION
-                )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    ActivityCompat.requestPermissions(
+                            this@MapsActivity,
+                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+                            FINE_BACKGROUND_LOCATION_ACCESS_REQUEST_CODE
+                    )
+                } else {
+                    ActivityCompat.requestPermissions(
+                            this@MapsActivity,
+                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                            FINE_LOCATION_ACCESS_REQUEST_CODE
+                    )
+                }
             }
         }
     }
@@ -165,7 +148,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             permissions: Array<String>, grantResults: IntArray
     ) {
         when (requestCode) {
-            MY_PERMISSIONS_REQUEST_LOCATION -> {
+            FINE_LOCATION_ACCESS_REQUEST_CODE, FINE_BACKGROUND_LOCATION_ACCESS_REQUEST_CODE -> {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
@@ -176,12 +159,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                                     Manifest.permission.ACCESS_FINE_LOCATION
                             ) == PackageManager.PERMISSION_GRANTED
                     ) {
-
-//                        mFusedLocationClient?.requestLocationUpdates(
-//                                mLocationRequest,
-//                                mLocationCallback,
-//                                Looper.myLooper()!!
-//                        )
                         mFusedLocationClient?.requestLocationUpdates(mLocationRequest, createLocationServiceIntent(this))
                         mGoogleMap.isMyLocationEnabled = true
                     }
@@ -199,6 +176,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     companion object {
-        const val MY_PERMISSIONS_REQUEST_LOCATION = 99
+        private const val FINE_LOCATION_ACCESS_REQUEST_CODE = 99
+        private const val FINE_BACKGROUND_LOCATION_ACCESS_REQUEST_CODE = 10002
     }
 }
