@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:public_app/api.dart';
 import 'package:public_app/colors/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -64,20 +65,46 @@ class MyHomePage extends StatelessWidget {
         ],
       ),
       body: HomeWidget(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          MapsLauncher.launchCoordinates(37.4220041, -122.0862462);
-        },
-        backgroundColor: Colors.white,
-        child: Transform.translate(
-          offset: Offset(0, 4),
-          child: SvgPicture.asset(
-            "assets/gmaps.svg",
-            semanticsLabel: 'Open in Maps',
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            mini: true,
+            onPressed: () {
+              _openActivity();
+            },
+            backgroundColor: Colors.white,
+            child: Text("android?"),
           ),
-        ),
+          SizedBox(
+            height: 10,
+          ),
+          FloatingActionButton(
+            onPressed: () {
+              MapsLauncher.launchCoordinates(37.4220041, -122.0862462);
+            },
+            backgroundColor: Colors.white,
+            child: Transform.translate(
+              offset: Offset(0, 4),
+              child: SvgPicture.asset(
+                "assets/gmaps.svg",
+                semanticsLabel: 'Open in Maps',
+              ),
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+  static const platform = const MethodChannel('org.ikol.public_app/open');
+
+  Future<void> _openActivity() async {
+    try {
+      await platform.invokeMethod('openActivity');
+    } on PlatformException catch (e) {
+      print(e);
+    }
   }
 }
 
@@ -161,6 +188,9 @@ class _HomeWidgetState extends State<HomeWidget> {
         if (success) {
           final bool active = _x[2];
           _active = active;
+          if (active) {
+            // TODO
+          }
         } else {
           _error = error;
         }

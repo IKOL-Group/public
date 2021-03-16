@@ -9,25 +9,20 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import androidx.annotation.NonNull
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.*
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
 import org.ikol.public_app.LocationUpdateService
 import org.ikol.public_app.R
 
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+class MapsActivity : AppCompatActivity() {
 
-    private lateinit var mGoogleMap: GoogleMap
-    private var mapFrag: SupportMapFragment? = null
     private lateinit var mLocationRequest: LocationRequest
     private var mFusedLocationClient: FusedLocationProviderClient? = null
+    private var mpendingIntent: PendingIntent? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,9 +31,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         supportActionBar?.hide()
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
-        mapFrag = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
-        mapFrag?.getMapAsync(this)
+        setupLocation()
+//        startForegroundService(mpendingIntent)
     }
 
 //    public override fun onPause() {
@@ -48,12 +42,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 //        mFusedLocationClient?.removeLocationUpdates(mLocationCallback)
 //    }
 
-    override fun onMapReady(googleMap: GoogleMap) {
-        mGoogleMap = googleMap
-
+    private fun setupLocation() {
         mLocationRequest = LocationRequest.create()
-        mLocationRequest.interval = 8 * 1000 // two minute interval
-        mLocationRequest.fastestInterval = 8 * 1000
+        mLocationRequest.interval = 3 * 1000 // two minute interval
+        mLocationRequest.fastestInterval = 2 * 1000
         mLocationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -64,24 +56,23 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             ) {
                 //Location Permission already granted
                 mFusedLocationClient?.requestLocationUpdates(mLocationRequest, createLocationServiceIntent(this))
-//                mFusedLocationClient?.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper()!!)
-                mGoogleMap.isMyLocationEnabled = true
             } else {
                 //Request Location Permission
                 checkLocationPermission()
             }
         } else {
             mFusedLocationClient?.requestLocationUpdates(mLocationRequest, createLocationServiceIntent(this))
-//            mFusedLocationClient?.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper()!!)
-            mGoogleMap.isMyLocationEnabled = true
         }
     }
 
-    @NonNull
-    private fun createLocationServiceIntent(@NonNull context: Context): PendingIntent {
+    private fun createLocationServiceIntent(context: Context): PendingIntent {
+        if (mpendingIntent != null) {
+            return mpendingIntent!!
+        }
         val intent = Intent(context, LocationUpdateService::class.java)
         intent.action = LocationUpdateService.ACTION_HANDLE_LOCATION
-        return PendingIntent.getService(context, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        mpendingIntent = PendingIntent.getService(context, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        return mpendingIntent!!
     }
 
 
@@ -160,7 +151,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                             ) == PackageManager.PERMISSION_GRANTED
                     ) {
                         mFusedLocationClient?.requestLocationUpdates(mLocationRequest, createLocationServiceIntent(this))
-                        mGoogleMap.isMyLocationEnabled = true
                     }
 
                 } else {
