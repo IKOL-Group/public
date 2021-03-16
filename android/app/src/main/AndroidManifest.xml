@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="org.ikol.public_app">
     <!-- io.flutter.app.FlutterApplication is an android.app.Application that
          calls FlutterMain.startInitialization(this); in its onCreate method.
@@ -6,15 +7,19 @@
          additional functionality it is fine to subclass or reimplement
          FlutterApplication and put your custom class here. -->
       <uses-permission android:name="android.permission.INTERNET"/>
+      <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+      <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
       <application
         android:name="io.flutter.app.FlutterApplication"
         android:label="public_app"
         android:usesCleartextTraffic="true"
-        android:icon="@mipmap/ic_launcher">
-        <activity
-            android:name=".MainActivity"
+        android:icon="@mipmap/ic_launcher"
+          tools:targetApi="m">
+          <service android:name=".LocationUpdateService"/>
+          <activity
+            android:name=".map.MapsActivity"
             android:launchMode="singleTop"
-            android:theme="@style/LaunchTheme"
+            android:theme="@style/Theme.AppCompat.DayNight"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
@@ -45,5 +50,10 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- https://stackoverflow.com/a/44993694/8608146 -->
+        <!-- https://console.cloud.google.com/apis/credentials -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyB4fz5CJGo0yXASiEtjQPJBxZViGan5dhs"/>
     </application>
 </manifest>

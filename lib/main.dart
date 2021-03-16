@@ -142,6 +142,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   void toggleActive() {
+    // remove any previous error
     _error = null;
     if (_loading || _active == null) return;
     // https://stackoverflow.com/a/52930197/8608146
@@ -160,7 +161,6 @@ class _HomeWidgetState extends State<HomeWidget> {
         if (success) {
           final bool active = _x[2];
           _active = active;
-          // remove any previous error
         } else {
           _error = error;
         }
