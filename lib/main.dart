@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:public_app/android/platform.dart';
 import 'package:public_app/api.dart';
 import 'package:public_app/colors/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -12,7 +12,7 @@ void main() {
   runApp(MyApp());
 }
 
-const double _kMinCircularProgressIndicatorSize = 36.0;
+// const double _kMinCircularProgressIndicatorSize = 36.0;
 
 class MyApp extends StatelessWidget {
   @override
@@ -39,6 +39,7 @@ class MyHomePage extends StatelessWidget {
       color: Color.fromARGB(255, 91, 175, 110),
     );
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text(
           'Hey Lokendar!',
@@ -71,7 +72,7 @@ class MyHomePage extends StatelessWidget {
           FloatingActionButton(
             mini: true,
             onPressed: () {
-              _openActivity();
+              AndroidMethods.openActivity();
             },
             backgroundColor: Colors.white,
             child: Text("android?"),
@@ -95,16 +96,6 @@ class MyHomePage extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  static const platform = const MethodChannel('org.ikol.public_app/open');
-
-  Future<void> _openActivity() async {
-    try {
-      await platform.invokeMethod('openActivity');
-    } on PlatformException catch (e) {
-      print(e);
-    }
   }
 }
 
@@ -144,11 +135,15 @@ class _HomeWidgetState extends State<HomeWidget> {
     super.initState();
   }
 
-  void asyncInitState() async {
+  Future<void> asyncInitState() async {
     setState(() {
+      _error = null;
       _loading = true;
     });
     final uinfo = await APIMethods.getUserInfo();
+    // increase loading time
+    // TODO do this only if request was very fast
+    await Future.delayed(Duration(milliseconds: 300));
     var success = uinfo[0];
     var error = uinfo[1];
     setState(() {
@@ -209,39 +204,55 @@ class _HomeWidgetState extends State<HomeWidget> {
       });
     }
 
-    return Container(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Stack(
-            children: [
-              Center(
-                child: SizedBox(
-                  child: _loading
-                      ? CircularProgressIndicator(
-                          strokeWidth: 10,
-                          semanticsLabel: _active == null
-                              ? "Checking share location state"
-                              : "Turning ${_active ? "off" : "on"} location sharing",
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            _active == null
-                                ? Color.fromARGB(155, 123, 123, 123)
-                                : _active
-                                    ? Color.fromARGB(155, 244, 47, 35)
-                                    : Color.fromARGB(155, 82, 167, 81),
-                          ),
-                        )
-                      : null,
-                  height: 220.0,
-                  width: 220.0,
-                ),
+    print(MediaQuery.of(context).padding.top);
+    print(MediaQuery.of(context).size.height);
+    print(kToolbarHeight);
+
+    return RefreshIndicator(
+      onRefresh: asyncInitState,
+      child: Container(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight:
+                    // 32 pixels is hardcoded
+                    MediaQuery.of(context).size.height - kToolbarHeight - 32,
               ),
-              Center(
-                child: buildShareOption(),
+              child: Stack(
+                children: [
+                  ListView(),
+                  Center(
+                    child: SizedBox(
+                      child: _loading
+                          ? CircularProgressIndicator(
+                              strokeWidth: 10,
+                              semanticsLabel: _active == null
+                                  ? "Checking share location state"
+                                  : "Turning ${_active ? "off" : "on"} location sharing",
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                _active == null
+                                    ? Color.fromARGB(155, 123, 123, 123)
+                                    : _active
+                                        ? Color.fromARGB(155, 244, 47, 35)
+                                        : Color.fromARGB(155, 82, 167, 81),
+                              ),
+                            )
+                          : null,
+                      height: 220.0,
+                      width: 220.0,
+                    ),
+                  ),
+                  Center(
+                    child: buildShareOption(),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
