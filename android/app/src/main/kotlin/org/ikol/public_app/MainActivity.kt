@@ -5,7 +5,7 @@ import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
-import org.ikol.public_app.map.MapsActivity
+import org.ikol.public_app.map.MapActivity
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
@@ -20,11 +20,11 @@ class MainActivity: FlutterActivity() {
             call, result ->
             when (call.method) {
                 "openActivity" -> {
-                    val intent = Intent(this, MapsActivity::class.java)
+                    val intent = Intent(this, MapActivity::class.java)
                     startActivity(intent)
                 }
                 else -> {
-                    result.error("NO_FOUND", "no such method", call.method)
+                    result.error("NOT_FOUND", "no such method", call.method)
                 }
             }
         }

@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">GetLocationBackground</string>
+    <string name="service_already_running">Service is already running</string>
+    <string name="service_start_successfully">Service start successfully</string>
     <string name="button">Open Flutter view</string>
+    <string name="preference_file_key">user_prefs</string>
+    <string name="user_stopped_service">manual_stop</string>
+    <string name="start_service">Start Sharing</string>
+    <string name="stop_service">Stop Sharing</string>
+    <string name="gps_enable">Enable Location</string>
+    <string name="please_turn_on_gps">Please turn on location</string>
+    <string name="ok">OK</string>
 </resources>
