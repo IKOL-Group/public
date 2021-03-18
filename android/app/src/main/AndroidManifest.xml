@@ -17,14 +17,14 @@
         android:fullBackupContent="false"
         android:icon="@mipmap/ic_launcher"
         android:label="public_app"
-        android:usesCleartextTraffic="true"
         android:theme="@style/Theme.AppCompat.DayNight"
+        android:usesCleartextTraffic="true"
         tools:ignore="UnusedAttribute">
 
         <service
-            android:foregroundServiceType="location"
             android:name=".LocationService"
-            android:enabled="true" />
+            android:enabled="true"
+            android:foregroundServiceType="location" />
 
         <receiver
             android:name=".receiver.RestartBackgroundService"
@@ -34,7 +34,7 @@
                 <action android:name="restartservice" />
             </intent-filter>
         </receiver>
-        
+
         <!-- android:theme="@style/MyMainTheme" -->
         <activity
             android:name=".MainActivity"

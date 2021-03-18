@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:public_app/android/platform.dart';
 import 'package:public_app/api.dart';
 import 'package:public_app/colors/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -96,7 +98,11 @@ class ScaffoldFAB extends StatelessWidget {
 
       permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
+        // TODO if denied forever this will hang because
+        // onRequestPermissionResult in geolocator plugin's PermissionManager.java
+        // doesn't fire
         permission = await Geolocator.requestPermission();
+        print(permission);
         if (permission == LocationPermission.deniedForever) {
           // Permissions are denied forever, handle appropriately.
           return Future.error(
@@ -115,6 +121,7 @@ class ScaffoldFAB extends StatelessWidget {
 
       // When we reach here, permissions are granted and we can
       // continue accessing the position of the device.
+      // TODO see why this is very slow
       return await Geolocator.getCurrentPosition();
     }
 
@@ -209,6 +216,10 @@ class _ShareWidgetState extends State<ShareWidget> {
       if (success) {
         var active = uinfo[2];
         _active = active;
+        if (!checkPermissions()) {
+          return;
+        }
+        updateLocationService();
       } else {
         _error = error;
       }
@@ -227,6 +238,7 @@ class _ShareWidgetState extends State<ShareWidget> {
     _error = null;
     if (_loading || _active == null) return;
     // https://stackoverflow.com/a/52930197/8608146
+    // TODO why the next line works
     if (_debounce?.isActive ?? false) _debounce.cancel();
 
     // if loading we anyway return
@@ -240,11 +252,16 @@ class _ShareWidgetState extends State<ShareWidget> {
       final String error = _x[1];
       setState(() {
         if (success) {
+          // server returns bool `!_active` here we're toggling
           final bool active = _x[2];
-          _active = active;
-          if (active) {
-            // TODO
+          if (active == _active) {
+            // TODO report to sentry did not toggle
           }
+          _active = active;
+          if (!checkPermissions()) {
+            return;
+          }
+          updateLocationService();
         } else {
           _error = error;
         }
@@ -252,6 +269,29 @@ class _ShareWidgetState extends State<ShareWidget> {
         _loading = false;
       });
     });
+  }
+
+  /// returns if there are no errors i.e. success
+  bool checkPermissions() {
+    try {
+      AndroidMethods.checkLocationPermissions();
+      return true;
+    } on PlatformException catch (e) {
+      _error = e.message;
+      _loading = false;
+    }
+    return false;
+  }
+
+  /// updates the state of the location service
+  void updateLocationService() {
+    // _active is from server which is what we need as the final state
+    // so if active we need to activate
+    if (_active) {
+      AndroidMethods.startSharing();
+    } else {
+      AndroidMethods.stopSharing();
+    }
   }
 
   @override

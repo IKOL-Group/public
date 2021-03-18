@@ -16,17 +16,22 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
 
         mLocationHelper = LocationHelper(activity, applicationContext)
-        mLocationHelper.checkLocationPermissions()
-        mLocationHelper.isLocationEnabled()
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
-//                "shouldShowExplanation" -> {
-//                    result.success(mLocationHelper.shouldShowRequestPermissionRationale())
-//                }
-                "locationCheck" -> {
-                    mLocationHelper.checkLocationPermissions()
-                    mLocationHelper.isLocationEnabled()
+                "shouldShowRequestPermissionRationale" -> {
+                    result.success(mLocationHelper.shouldShowRequestPermissionRationale())
+                }
+                "checkLocationPermissions" -> {
+                    if (mLocationHelper.isLocationEnabled()) {
+                        mLocationHelper.checkLocationPermissions()
+                        result.success(null)
+                        return@setMethodCallHandler
+                    }
+                    result.error("LOCATION_OFF", "Location needs to be turned on", null)
+                }
+                "isLocationEnabled" -> {
+                    result.success(mLocationHelper.isLocationEnabled())
                 }
                 "startSharing" -> {
                     mLocationHelper.startSharing()
@@ -49,7 +54,8 @@ class MainActivity : FlutterActivity() {
             LocationHelper.FINE_LOCATION_ACCESS_REQUEST_CODE,
             LocationHelper.FINE_BACKGROUND_LOCATION_ACCESS_REQUEST_CODE -> {
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.isNotEmpty()) return
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Got permission
                 } else {
                     // TODO check if we got background location permission if >= android 11
@@ -107,7 +113,7 @@ class MainActivity : FlutterActivity() {
 //    }
 
     companion object {
-        private const val CHANNEL = "org.ikol.public_app/open"
+        private const val CHANNEL = "org.ikol.public_app/share"
     }
 
 }

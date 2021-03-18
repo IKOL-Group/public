@@ -8,6 +8,7 @@ const String baseURL = 'http://192.168.0.101:3000';
 const String userID = '604a724263d642654fd8b333';
 
 class APIMethods {
+  /// Returns [success, errorMessage, (optional) result]
   static Future<List> toggleActive(bool active) async {
     const route = '/public_users/user/$userID/actions/active';
     final client = HttpClient();

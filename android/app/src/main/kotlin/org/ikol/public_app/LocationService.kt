@@ -2,10 +2,8 @@ package org.ikol.public_app
 
 import android.Manifest
 import android.app.*
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
@@ -13,20 +11,17 @@ import android.os.Build
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.*
 import org.ikol.public_app.receiver.RestartBackgroundService
-import java.util.*
-
 
 class LocationService : Service() {
-    var counter = 0
     var latitude: Double = 0.0
     var longitude: Double = 0.0
-    private lateinit var mReceiver: UserStopServiceReceiver
+    lateinit var mFusedLocationClient: FusedLocationProviderClient
+    lateinit var locationCallback: LocationCallback
 
     override fun onCreate() {
         super.onCreate()
@@ -43,11 +38,17 @@ class LocationService : Service() {
                     nf
             )
         }
+        mFusedLocationClient =
+                LocationServices.getFusedLocationProviderClient(this)
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                val location: Location = locationResult.lastLocation
+                latitude = location.latitude
+                longitude = location.longitude
+                Log.d("LocationService", "location update $location")
+            }
+        }
         requestLocationUpdates()
-        mReceiver = UserStopServiceReceiver()
-        val intf = IntentFilter()
-        intf.addAction(USER_STOP_SERVICE_REQUEST)
-        registerReceiver(mReceiver, intf)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -91,88 +92,33 @@ class LocationService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
-        startTimer()
         Log.d(TAG, intent?.action.toString())
         return START_STICKY
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        stopTimerTask()
 
-        unregisterReceiver(mReceiver)
 //        https://stackoverflow.com/a/13558642/8608146
         val sharedPref =
                 getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
 
-        fullStop = sharedPref.getBoolean(getString(R.string.user_stopped_service), false)
+        val fullStop: Boolean = sharedPref.getBoolean(getString(R.string.user_stopped_service), false)
         with(sharedPref.edit()) {
 //            TODO set it to false or remove?
             remove(getString(R.string.user_stopped_service))
             apply()
         }
 
-        Log.d(TAG, "Fully stop $fullStop")
+        stopLocationUpdates()
 
-        if (fullStop) {
-            Toast.makeText(
-                    applicationContext, "Stop Service",
-                    Toast.LENGTH_LONG
-            ).show()
-            return
-        }
+        if (fullStop) return
 
+//        Restart service if app is closed normally
         val broadcastIntent = Intent()
         broadcastIntent.action = "restartservice"
         broadcastIntent.setClass(this, RestartBackgroundService::class.java)
         sendBroadcast(broadcastIntent)
-    }
-
-    private var fullStop = false
-
-    inner class UserStopServiceReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            //code that handles user specific way of stopping service
-            Toast.makeText(
-                    applicationContext, "Stop IT!!!!",
-                    Toast.LENGTH_LONG
-            ).show()
-
-            Log.d(TAG, "STOP IT!!!!")
-            fullStop = true
-            stopSelf()
-        }
-    }
-
-
-    private var timer: Timer? = null
-    private var timerTask: TimerTask? = null
-    private fun startTimer() {
-        timer = Timer()
-        timerTask = object : TimerTask() {
-            override fun run() {
-                val count = counter++
-                if (latitude != 0.0 && longitude != 0.0) {
-                    Log.d(
-                            "Location::",
-                            latitude.toString() + ":::" + longitude.toString() + "Count" +
-                                    count.toString()
-                    )
-                }
-            }
-        }
-        timer!!.schedule(
-                timerTask,
-                0,
-                8000
-        ) //1 * 60 * 1000 1 minute
-    }
-
-    private fun stopTimerTask() {
-        if (timer != null) {
-            timer!!.cancel()
-            timer = null
-        }
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -184,8 +130,6 @@ class LocationService : Service() {
         request.interval = 8000
         request.fastestInterval = 7000
         request.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        val client: FusedLocationProviderClient =
-                LocationServices.getFusedLocationProviderClient(this)
 
         val permission = ContextCompat.checkSelfPermission(
                 this,
@@ -193,20 +137,16 @@ class LocationService : Service() {
         )
         if (permission == PackageManager.PERMISSION_GRANTED) { // Request location updates and when an update is
             // received, store the location in Firebase
-            client.requestLocationUpdates(request, object : LocationCallback() {
-                override fun onLocationResult(locationResult: LocationResult) {
-                    val location: Location = locationResult.lastLocation
-                    latitude = location.latitude
-                    longitude = location.longitude
-                    Log.d("Location Service", "location update $location")
-                }
-            }, Looper.myLooper()!!)
+            mFusedLocationClient.requestLocationUpdates(request, locationCallback, Looper.myLooper()!!)
         }
     }
 
+    fun stopLocationUpdates() {
+        mFusedLocationClient.removeLocationUpdates(locationCallback)
+    }
+
     companion object {
-        private const val TAG = "BOOBA"
+        private const val TAG = "LocationService"
         private const val NOTIFICATION_CHANNEL_ID = "com.getlocationbackground"
-        const val USER_STOP_SERVICE_REQUEST = "USER_STOP_SERVICE"
     }
 }
