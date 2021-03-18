@@ -3,6 +3,7 @@ package org.ikol.public_app.util
 import android.app.Activity
 import android.app.ActivityManager
 import android.app.AlertDialog
+import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.location.LocationManager
@@ -34,7 +35,7 @@ object Util {
         val alertDialog = AlertDialog.Builder(context).create()
         alertDialog.setTitle(title)
         alertDialog.setMessage(message)
-        alertDialog.setButton(btnText) { dialog, _ ->
+        alertDialog.setButton(Dialog.BUTTON_POSITIVE, btnText) { dialog, _ ->
             dialog.dismiss()
             context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
         }

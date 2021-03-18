@@ -18,9 +18,11 @@
         android:icon="@mipmap/ic_launcher"
         android:label="public_app"
         android:usesCleartextTraffic="true"
-        tools:targetApi="m">
+        android:theme="@style/Theme.AppCompat.DayNight"
+        tools:ignore="UnusedAttribute">
 
         <service
+            android:foregroundServiceType="location"
             android:name=".LocationService"
             android:enabled="true" />
 
@@ -32,18 +34,14 @@
                 <action android:name="restartservice" />
             </intent-filter>
         </receiver>
-
-        <activity
-            android:name=".map.MapActivity"
-            android:launchMode="singleTask"
-            android:theme="@style/Theme.AppCompat.DayNight" />
-
+        
+        <!-- android:theme="@style/MyMainTheme" -->
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
             android:launchMode="singleTop"
-            android:theme="@style/Theme.AppCompat.DayNight"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
             android:windowSoftInputMode="adjustResize">
             <!-- Specifies an Android theme to apply to this Activity as soon as
                  the Android process has started. This theme is visible to the user

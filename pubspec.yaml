@@ -15,6 +15,7 @@ dependencies:
   flutter_svg: ^0.19.3
   http: ^0.13.0
   maps_launcher: ^1.2.2+2
+  geolocator: 6.2.1
 
 dev_dependencies:
   flutter_test:

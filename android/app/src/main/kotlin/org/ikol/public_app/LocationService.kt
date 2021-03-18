@@ -18,7 +18,6 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.*
-import org.ikol.public_app.map.MapActivity
 import org.ikol.public_app.receiver.RestartBackgroundService
 import java.util.*
 
@@ -36,7 +35,7 @@ class LocationService : Service() {
             createNotificationChanel()
         } else {
             val nf = Notification()
-            val intent = Intent(this, MapActivity::class.java)
+            val intent = Intent(this, MainActivity::class.java)
             val pendingIntent = PendingIntent.getActivity(this, 267, intent, PendingIntent.FLAG_UPDATE_CURRENT)
             nf.contentIntent = pendingIntent
             startForeground(
@@ -71,7 +70,7 @@ class LocationService : Service() {
 
 //        https://github.com/phanirithvij/Geofence-sample-kt/blob/main/app/src/main/java/com/example/geofencing/NotificationHelper.kt#L31
 
-        val intent = Intent(applicationContext, MapActivity::class.java).apply {
+        val intent = Intent(applicationContext, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
         }
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)

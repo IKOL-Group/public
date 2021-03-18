@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:public_app/android/platform.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:public_app/api.dart';
 import 'package:public_app/colors/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -65,48 +65,107 @@ class MyHomePage extends StatelessWidget {
           ),
         ],
       ),
-      body: HomeWidget(),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            mini: true,
-            onPressed: () {
-              AndroidMethods.openActivity();
-            },
-            backgroundColor: Colors.white,
-            child: Text("android?"),
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          FloatingActionButton(
-            onPressed: () {
-              MapsLauncher.launchCoordinates(37.4220041, -122.0862462);
-            },
-            backgroundColor: Colors.white,
-            child: Transform.translate(
-              offset: Offset(0, 4),
-              child: SvgPicture.asset(
-                "assets/gmaps.svg",
-                semanticsLabel: 'Open in Maps',
-              ),
-            ),
-          ),
-        ],
+      body: ShareWidget(),
+      floatingActionButton: ScaffoldFAB(),
+    );
+  }
+}
+
+class ScaffoldFAB extends StatelessWidget {
+  const ScaffoldFAB({
+    Key key,
+  }) : super(key: key);
+
+  void _openLocationInMaps(BuildContext context) async {
+    /// Determine the current position of the device.
+    ///
+    /// When the location services are not enabled or permissions
+    /// are denied the `Future` will return an error.
+    Future<Position> _determinePosition() async {
+      bool serviceEnabled;
+      LocationPermission permission;
+
+      // Test if location services are enabled.
+      serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        // Location services are not enabled don't continue
+        // accessing the position and request users of the
+        // App to enable the location services.
+        return Future.error('Please turn on location');
+      }
+
+      permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.deniedForever) {
+          // Permissions are denied forever, handle appropriately.
+          return Future.error(
+              'Location permissions are permanently denied, we cannot request permissions.');
+        }
+
+        if (permission == LocationPermission.denied) {
+          // Permissions are denied, next time you could try
+          // requesting permissions again (this is also where
+          // Android's shouldShowRequestPermissionRationale
+          // returned true. According to Android guidelines
+          // your App should show an explanatory UI now.
+          return Future.error('Location permissions are denied');
+        }
+      }
+
+      // When we reach here, permissions are granted and we can
+      // continue accessing the position of the device.
+      return await Geolocator.getCurrentPosition();
+    }
+
+    try {
+      var pos = await _determinePosition();
+      MapsLauncher.launchCoordinates(pos.latitude, pos.longitude, "Location");
+    } catch (e) {
+      print(e.runtimeType);
+      showSnackBar(context, "$e");
+    }
+  }
+
+  void showSnackBar(BuildContext context, String value) {
+    // https://stackoverflow.com/a/49932085/8608146
+    Scaffold.of(context)
+        // ignore: deprecated_member_use
+        .showSnackBar(
+      SnackBar(
+        content: Text(value),
+        action: SnackBarAction(
+          label: "DISMISS",
+          onPressed: () {},
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      onPressed: () => _openLocationInMaps(context),
+      backgroundColor: Colors.white,
+      child: Transform.translate(
+        offset: Offset(0, 4),
+        child: SvgPicture.asset(
+          "assets/gmaps.svg",
+          semanticsLabel: 'Open in Maps',
+        ),
       ),
     );
   }
 }
 
-class HomeWidget extends StatefulWidget {
-  HomeWidget({Key key}) : super(key: key);
+class ShareWidget extends StatefulWidget {
+  ShareWidget({Key key}) : super(key: key);
 
   @override
-  _HomeWidgetState createState() => _HomeWidgetState();
+  _ShareWidgetState createState() => _ShareWidgetState();
 }
 
-class _HomeWidgetState extends State<HomeWidget> {
+class _ShareWidgetState extends State<ShareWidget> {
   bool _active;
   String _error;
   var _loading = false;
@@ -219,7 +278,9 @@ class _HomeWidgetState extends State<HomeWidget> {
               constraints: BoxConstraints(
                 maxHeight:
                     // 32 pixels is hardcoded
-                    MediaQuery.of(context).size.height - kToolbarHeight - 32,
+                    MediaQuery.of(context).size.height -
+                        kToolbarHeight -
+                        62.182,
               ),
               child: Stack(
                 children: [
