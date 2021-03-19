@@ -15,13 +15,35 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.*
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.ikol.public_app.receiver.RestartBackgroundService
+import java.io.DataOutputStream
+import java.net.HttpURLConnection
+import java.net.URL
+
+
+@Serializable
+data class Location2(val latitude: Double, val longitude: Double)
+
+@Serializable
+data class UpdateEvent(val location: Location2, val publicUserID: String, val businessName: String) {
+//    format =  `{
+//        "location": {
+//            "longitude" : 32.193122,
+//            "latitude" : 45.4312
+//        },
+//        "publicUserId" : "60487ad389ca20853d93630e",
+//        "businessName" : "DeliveryBoyz"
+//    }`
+}
 
 class LocationService : Service() {
     var latitude: Double = 0.0
     var longitude: Double = 0.0
-    lateinit var mFusedLocationClient: FusedLocationProviderClient
-    lateinit var locationCallback: LocationCallback
+    private lateinit var mFusedLocationClient: FusedLocationProviderClient
+    private lateinit var locationCallback: LocationCallback
 
     override fun onCreate() {
         super.onCreate()
@@ -46,6 +68,7 @@ class LocationService : Service() {
                 latitude = location.latitude
                 longitude = location.longitude
                 Log.d("LocationService", "location update $location")
+                updateLocationInServer(latitude, longitude)
             }
         }
         requestLocationUpdates()
@@ -121,6 +144,49 @@ class LocationService : Service() {
         sendBroadcast(broadcastIntent)
     }
 
+    fun updateLocationInServer(latitude: Double, longitude: Double) {
+//        https://github.com/IKOL-Group/public/blob/4ffb43fa68997b36c4134753636cb09be13ccce0/android/app/src/main/kotlin/org/ikol/public_app/LocationUpdateService.kt#L53
+        val thread = Thread {
+            try {
+                val baseURL = "http://192.168.0.101:3000"
+                val mURL = URL("$baseURL/location/public/actions/update")
+
+                with(mURL.openConnection() as HttpURLConnection) {
+                    requestMethod = "PUT"
+
+                    val event = UpdateEvent(Location2(latitude, longitude), "604a724263d642654fd8b333", "DeliveryBoyz")
+                    val message = Json.encodeToString(event)
+                    println(message)
+
+                    val postData: ByteArray =
+                            message.toByteArray(Charsets.UTF_8)
+
+                    // https://stackoverflow.com/a/49191766/8608146
+
+                    setRequestProperty("charset", "utf-8")
+                    setRequestProperty("Content-length", postData.size.toString())
+                    setRequestProperty("Content-Type", "application/json")
+
+                    try {
+                        val outputStream = DataOutputStream(outputStream)
+                        outputStream.write(postData)
+                        outputStream.flush()
+                    } catch (exception: Exception) {
+                        println("Failed to send request: ${exception.message}")
+                    }
+
+                    println("URL : $url")
+                    println("Response Code : $responseCode")
+                    println("Response : $responseMessage")
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        thread.start()
+    }
+
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
@@ -141,7 +207,7 @@ class LocationService : Service() {
         }
     }
 
-    fun stopLocationUpdates() {
+    private fun stopLocationUpdates() {
         mFusedLocationClient.removeLocationUpdates(locationCallback)
     }
 

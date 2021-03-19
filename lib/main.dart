@@ -9,6 +9,10 @@ import 'package:public_app/colors/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:maps_launcher/maps_launcher.dart';
+import 'package:public_app/screens/help.dart';
+import 'package:public_app/screens/login.dart';
+import 'package:public_app/screens/profile/profile.dart';
+import 'package:public_app/screens/register.dart';
 
 void main() {
   runApp(MyApp());
@@ -25,6 +29,18 @@ class MyApp extends StatelessWidget {
         accentColor: kAccentColor,
         appBarTheme: AppBarTheme(backgroundColor: Colors.white),
       ),
+      // theme: ThemeData.lerp(
+      //   ThemeData.dark(),
+      //   ThemeData.light(),
+      //   .9,
+      // ),
+      routes: {
+        ProfilePage.route: (x) => ProfilePage(),
+        HelpPage.route: (x) => HelpPage(),
+        LoginPage.route: (x) => LoginPage(),
+        RegisterPage.route: (x) => RegisterPage(),
+      },
+      // home: ProfilePage(),
       home: MyHomePage(title: 'IKOL'),
     );
   }
@@ -33,6 +49,7 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatelessWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
   final String title;
+  static final String route = "/";
 
   @override
   Widget build(BuildContext context) {
@@ -56,14 +73,18 @@ class MyHomePage extends StatelessWidget {
               "assets/usericon.svg",
               semanticsLabel: 'User Page',
             ),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).pushNamed(ProfilePage.route);
+            },
           ),
           IconButton(
             icon: SvgPicture.asset(
               "assets/help.svg",
               semanticsLabel: 'Help Page',
             ),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).pushNamed(HelpPage.route);
+            },
           ),
         ],
       ),

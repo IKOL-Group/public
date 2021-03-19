@@ -12,6 +12,7 @@ import org.ikol.public_app.LocationService
 import org.ikol.public_app.R
 import org.ikol.public_app.util.Util
 
+
 class LocationHelper(private var mActivity: Activity, base: Context) : ContextWrapper(base) {
     private var mLocationService: LocationService = LocationService()
     private lateinit var mServiceIntent: Intent
@@ -75,7 +76,6 @@ class LocationHelper(private var mActivity: Activity, base: Context) : ContextWr
             stopService(mServiceIntent)
         }
     }
-
 
     companion object {
         const val FINE_LOCATION_ACCESS_REQUEST_CODE = 99
