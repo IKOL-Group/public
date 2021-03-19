@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:public_app/colors/colors.dart';
+import 'package:public_app/colors/text.dart';
 
 class ProfilePage extends StatefulWidget {
   ProfilePage({Key key}) : super(key: key);
@@ -19,7 +19,8 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: AppBar(
         title: Text(
           "My Account",
-          style: kPoppinsTextStyle,
+          style: TextStyle(
+              color: Theme.of(context).appBarTheme.titleTextStyle.color),
         ),
         // https://stackoverflow.com/a/50461263/8608146
         titleSpacing: 0,

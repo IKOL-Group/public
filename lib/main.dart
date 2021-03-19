@@ -31,12 +31,14 @@ class MyApp extends StatelessWidget {
       // ),
       theme: ThemeData.lerp(
         ThemeData.dark().copyWith(
+          accentColor: kAccentColor,
           scaffoldBackgroundColor: Colors.black,
           backgroundColor: Colors.black,
           iconTheme: IconThemeData(
             color: Colors.white,
           ),
           appBarTheme: AppBarTheme(
+            titleTextStyle: TextStyle(color: kGreenColor),
             actionsIconTheme: IconThemeData(
               color: Colors.white,
             ),
@@ -46,6 +48,7 @@ class MyApp extends StatelessWidget {
           accentColor: kAccentColor,
           appBarTheme: AppBarTheme(
             backgroundColor: Colors.white,
+            titleTextStyle: TextStyle(color: Colors.black),
             actionsIconTheme: IconThemeData(
               color: Colors.black,
             ),
@@ -75,17 +78,15 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var textStyle = TextStyle(
-      // fontWeight: FontWeight.bold,
-      color: Color.fromARGB(255, 91, 175, 110),
-    );
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text(
           'Hey Lokendar!',
           style: GoogleFonts.poppins(
-            textStyle: textStyle,
+            textStyle: TextStyle(
+              color: kGreenColor,
+            ),
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -380,10 +381,10 @@ class _ShareWidgetState extends State<ShareWidget> {
                                   : "Turning ${_active ? "off" : "on"} location sharing",
                               valueColor: AlwaysStoppedAnimation<Color>(
                                 _active == null
-                                    ? Color.fromARGB(155, 123, 123, 123)
+                                    ? kGreyShareDisabled
                                     : _active
-                                        ? Color.fromARGB(155, 244, 47, 35)
-                                        : Color.fromARGB(155, 82, 167, 81),
+                                        ? kStopColor
+                                        : kShareColor,
                               ),
                             )
                           : null,
@@ -407,18 +408,18 @@ class _ShareWidgetState extends State<ShareWidget> {
     return ClipOval(
       child: Material(
         color: _active == null
-            ? Color.fromARGB(255, 123, 123, 123)
+            ? kGreyShareDisabled
             : _active
-                ? Color.fromARGB(255, 244, 47, 35)
-                : Color.fromARGB(255, 82, 167, 81),
+                ? kStopColor
+                : kShareColor,
         child: InkWell(
           onTap: () {
             toggleActive();
           },
           splashColor: _active == null
-              ? Color.fromARGB(255, 123, 123, 123)
+              ? kGreyShareDisabled
               : _active
-                  ? Color.fromARGB(255, 136, 48, 42)
+                  ? kDarkerStopRipple
                   : kAccentColor,
           child: SizedBox(
             width: 220,
