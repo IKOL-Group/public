@@ -25,15 +25,37 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'IKOLE',
-      theme: ThemeData(
-        accentColor: kAccentColor,
-        appBarTheme: AppBarTheme(backgroundColor: Colors.white),
-      ),
-      // theme: ThemeData.lerp(
-      //   ThemeData.dark(),
-      //   ThemeData.light(),
-      //   .9,
+      // theme: ThemeData(
+      //   accentColor: kAccentColor,
+      //   appBarTheme: AppBarTheme(backgroundColor: Colors.white),
       // ),
+      theme: ThemeData.lerp(
+        ThemeData.dark().copyWith(
+          scaffoldBackgroundColor: Colors.black,
+          backgroundColor: Colors.black,
+          iconTheme: IconThemeData(
+            color: Colors.white,
+          ),
+          appBarTheme: AppBarTheme(
+            actionsIconTheme: IconThemeData(
+              color: Colors.white,
+            ),
+          ),
+        ),
+        ThemeData.light().copyWith(
+          accentColor: kAccentColor,
+          appBarTheme: AppBarTheme(
+            backgroundColor: Colors.white,
+            actionsIconTheme: IconThemeData(
+              color: Colors.black,
+            ),
+          ),
+          iconTheme: IconThemeData(
+            color: Colors.black,
+          ),
+        ),
+        1,
+      ),
       routes: {
         ProfilePage.route: (x) => ProfilePage(),
         HelpPage.route: (x) => HelpPage(),
@@ -72,6 +94,7 @@ class MyHomePage extends StatelessWidget {
             icon: SvgPicture.asset(
               "assets/usericon.svg",
               semanticsLabel: 'User Page',
+              color: Theme.of(context).appBarTheme.actionsIconTheme.color,
             ),
             onPressed: () {
               Navigator.of(context).pushNamed(ProfilePage.route);
@@ -81,6 +104,7 @@ class MyHomePage extends StatelessWidget {
             icon: SvgPicture.asset(
               "assets/help.svg",
               semanticsLabel: 'Help Page',
+              color: Theme.of(context).appBarTheme.actionsIconTheme.color,
             ),
             onPressed: () {
               Navigator.of(context).pushNamed(HelpPage.route);

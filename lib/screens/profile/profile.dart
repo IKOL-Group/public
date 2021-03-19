@@ -24,7 +24,7 @@ class _ProfilePageState extends State<ProfilePage> {
         // https://stackoverflow.com/a/50461263/8608146
         titleSpacing: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+          icon: Icon(Icons.arrow_back_ios_new),
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
@@ -147,7 +147,6 @@ class ProfileCard extends StatelessWidget {
                     subtitle,
                     style: kSubtitleTextStyleSize(fontSize: 14, mono: mono)
                         .copyWith(
-                      // letterSpacing: 1,
                       color: Colors.black87,
                     ),
                   ),

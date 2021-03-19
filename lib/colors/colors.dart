@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 const Color kAccentColor = Color.fromARGB(255, 87, 185, 86);
 const Color kGreyIconColor = Color.fromARGB(255, 123, 123, 123);
+const Color kLinkColor = Color.fromARGB(255, 44, 101, 186);
 
 final TextStyle kPoppinsTextStyle = GoogleFonts.poppins(
   textStyle: TextStyle(color: Colors.black, fontSize: 20),
