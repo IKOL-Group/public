@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:public_app/Routes/Routes.dart';
 import 'package:public_app/colors/colors.dart';
 import 'package:public_app/colors/text.dart';
 
 class ProfilePage extends StatefulWidget {
-  ProfilePage({Key key}) : super(key: key);
+  final String test;
+  ProfilePage({Key key, this.test}) : super(key: key);
 
   static final route = "/profile";
 
@@ -25,7 +27,7 @@ class _ProfilePageState extends State<ProfilePage> {
         // https://stackoverflow.com/a/50461263/8608146
         titleSpacing: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new),
+          icon: Icon(Icons.arrow_back_ios),
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
@@ -67,10 +69,15 @@ class _ProfilePageState extends State<ProfilePage> {
                 title: 'Email',
                 subtitle: 'something@email.com',
               ),
-              ProfileCard(
-                icon: Icons.vpn_key_rounded,
-                title: 'Password',
-                subtitle: 'Tap To Change Password',
+              InkWell(
+                onTap: () {
+                  Navigator.of(context).pushNamed(Routes.changePassword);
+                },
+                child: ProfileCard(
+                  icon: Icons.vpn_key_rounded,
+                  title: 'Password',
+                  subtitle: 'Tap To Change Password',
+                ),
               ),
               ProfileCard(
                 icon: Icons.business,
@@ -82,6 +89,29 @@ class _ProfilePageState extends State<ProfilePage> {
                 title: 'EmployeeID',
                 subtitle: '1931920320',
                 mono: true,
+              ),
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: ElevatedButton(
+                      style: ButtonStyle(
+                          padding: MaterialStateProperty.all(
+                              EdgeInsets.symmetric(
+                                  vertical: 4.0, horizontal: 30.0)),
+                          backgroundColor:
+                              MaterialStateProperty.resolveWith<Color>(
+                                  (Set<MaterialState> state) {
+                            return Colors.red;
+                          }),
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                            ),
+                          )),
+                      onPressed: () {},
+                      child: Text('LogOut', style: kPoppinsTextStyle3)),
+                ),
               ),
             ],
           ),
