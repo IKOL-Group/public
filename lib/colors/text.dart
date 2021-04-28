@@ -30,3 +30,6 @@ TextStyle kSubtitleTextStyleSize({double fontSize = 20, bool mono: false}) =>
         : GoogleFonts.poppins(
             textStyle: TextStyle(color: Colors.black, fontSize: fontSize),
           );
+
+
+const String kBaseUrl = 'http://139.59.45.103:3000';
