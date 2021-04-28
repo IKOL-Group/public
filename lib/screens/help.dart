@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:public_app/Customs/CustomTextFormField.dart';
 import 'package:public_app/colors/colors.dart';
 import 'package:public_app/colors/text.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -16,6 +17,7 @@ class HelpPage extends StatefulWidget {
 class _HelpPageState extends State<HelpPage> {
   @override
   Widget build(BuildContext context) {
+    var width = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -25,45 +27,175 @@ class _HelpPageState extends State<HelpPage> {
         // https://stackoverflow.com/a/50461263/8608146
         titleSpacing: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new),
+          icon: Icon(Icons.arrow_back_ios),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: Container(
-        child: Align(
-          alignment: Alignment.topLeft,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: EdgeInsets.only(top: 29),
-              ),
-              Link(
-                content: 'How to use Our App (Videos)',
-                url:
-                    'https://stackoverflow.com/questions/43583411/how-to-create-a-hyperlink-in-flutter-widget',
-              ),
-              Paragraph(content: 'FAQ\'s'),
-              Link(
-                content: 'Read These Questions',
-                url:
-                    'https://stackoverflow.com/questions/43583411/how-to-create-a-hyperlink-in-flutter-widget',
-              ),
-              Paragraph(content: 'Support Request'),
-              Link(
-                content: 'Report An Issue',
-                url:
-                    'https://stackoverflow.com/questions/43583411/how-to-create-a-hyperlink-in-flutter-widget',
-              ),
-              Padding(padding: EdgeInsets.only(top: 20)),
-              Paragraph(
-                  fontSize: 22, content: 'Voice Support (MON-FRI 9AM-6PM)'),
-            ],
+      body: ListView(
+        children: [
+          SizedBox(height: 30.0),
+          Align(
+            alignment: Alignment.center,
+            child: Link(
+              content: 'Request For a call back',
+              url:
+                  'https://stackoverflow.com/questions/43583411/how-to-create-a-hyperlink-in-flutter-widget',
+            ),
           ),
-        ),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: ElevatedButton(
+                  style: ButtonStyle(
+                      padding: MaterialStateProperty.all(EdgeInsets.symmetric(
+                          vertical: 2.0, horizontal: 30.0)),
+                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                          (Set<MaterialState> state) {
+                        return kGreenColor;
+                      }),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18.0),
+                        ),
+                      )),
+                  onPressed: () {
+                    buildCallBackPopUp();
+                  },
+                  child: Text('Click Here', style: kPoppinsTextStyle3)),
+            ),
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: Paragraph(content: 'Or'),
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: Container(
+              height: 150.0,
+              width: width / 1.5,
+              padding: EdgeInsets.all(4.0),
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(color: Colors.black, width: 2.0)),
+              child: CustomTextFormFeild(
+                hintName: 'Write your Queries here...',
+                readOnly: false,
+                obscureText: false,
+                maxLines: 5,
+              ),
+            ),
+          ),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: ElevatedButton(
+                  style: ButtonStyle(
+                      padding: MaterialStateProperty.all(EdgeInsets.symmetric(
+                          vertical: 2.0, horizontal: 30.0)),
+                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                          (Set<MaterialState> state) {
+                        return kGreenColor;
+                      }),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18.0),
+                        ),
+                      )),
+                  onPressed: () {
+                    buildQueryPopUp();
+                  },
+                  child: Text('Submit', style: kPoppinsTextStyle3)),
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+  buildCallBackPopUp() {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.0)),
+            content: Text('Will Get Back To you Soon',
+                textAlign: TextAlign.center, style: kPoppinsTextStyle),
+            actions: [
+              Row(
+                children: [
+                  ElevatedButton(
+                      style: ButtonStyle(
+                          padding: MaterialStateProperty.all(
+                              EdgeInsets.symmetric(
+                                  vertical: 2.0, horizontal: 30.0)),
+                          backgroundColor:
+                              MaterialStateProperty.resolveWith<Color>(
+                                  (Set<MaterialState> state) {
+                            return kGreenColor;
+                          }),
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                            ),
+                          )),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Text('Back', style: kPoppinsTextStyle3)),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width / 4.5,
+                  ),
+                ],
+              ),
+            ],
+          );
+        });
+  }
+
+  buildQueryPopUp() {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.0)),
+            content: Text('Query Submitted Successfully',
+                textAlign: TextAlign.center, style: kPoppinsTextStyle),
+            actions: <Widget>[
+              Row(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                      style: ButtonStyle(
+                          padding: MaterialStateProperty.all(
+                              EdgeInsets.symmetric(
+                                  vertical: 2.0, horizontal: 30.0)),
+                          backgroundColor:
+                              MaterialStateProperty.resolveWith<Color>(
+                                  (Set<MaterialState> state) {
+                            return kGreenColor;
+                          }),
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                            ),
+                          )),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Text('Back', style: kPoppinsTextStyle3)),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width / 4,
+                  ),
+                ],
+              ),
+            ],
+          );
+        });
   }
 }
 

@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
@@ -10,9 +9,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:maps_launcher/maps_launcher.dart';
 import 'package:public_app/screens/help.dart';
-import 'package:public_app/screens/login.dart';
 import 'package:public_app/screens/profile/profile.dart';
-import 'package:public_app/screens/register.dart';
+
+import 'Routes/Routes.dart';
 
 void main() {
   runApp(MyApp());
@@ -24,11 +23,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'IKOLE',
       // theme: ThemeData(
       //   accentColor: kAccentColor,
       //   appBarTheme: AppBarTheme(backgroundColor: Colors.white),
       // ),
+      debugShowCheckedModeBanner: false,
       theme: ThemeData.lerp(
         ThemeData.dark().copyWith(
           accentColor: kAccentColor,
@@ -59,22 +58,17 @@ class MyApp extends StatelessWidget {
         ),
         1,
       ),
-      routes: {
-        ProfilePage.route: (x) => ProfilePage(),
-        HelpPage.route: (x) => HelpPage(),
-        LoginPage.route: (x) => LoginPage(),
-        RegisterPage.route: (x) => RegisterPage(),
-      },
-      // home: ProfilePage(),
-      home: MyHomePage(title: 'IKOL'),
+      initialRoute: Routes.onBoarding,
+      onGenerateRoute: Routes.generateRoute,
     );
   }
 }
 
-class MyHomePage extends StatelessWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-  final String title;
-  static final String route = "/";
+class HomeScreen extends StatelessWidget {
+  final String token;
+  HomeScreen({Key key, this.token}) : super(key: key);
+
+  // static final String route = "/";
 
   @override
   Widget build(BuildContext context) {
