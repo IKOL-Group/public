@@ -6,7 +6,7 @@ class HttpService {
   Dio dio = new Dio();
   Future userSignUp(email, password, name, phone, employeeId, bussinessMan,
       longitude, latitude) async {
-    FormData signInParams = FormData.fromMap({
+    FormData signUpParams = FormData.fromMap({
       "email": email,
       "password": password,
       "name": name,
@@ -17,7 +17,7 @@ class HttpService {
       "extras": {"milkman": true, "bellboy": true, "filters": "gt 30"}
     });
     final response = await dio.post(kBaseUrl + "/public_users/actions/create",
-        data: signInParams,
+        data: signUpParams,
         options:
             Options(headers: {HttpHeaders.acceptHeader: 'application/json'}));
     if (response.statusCode == 200) {
@@ -85,9 +85,9 @@ class HttpService {
   }
 
   Future userSetActive(bool value, token) async {
-    FormData signInParams = FormData.fromMap({"active": value});
+    FormData userActiveParams = FormData.fromMap({"active": value});
     final response = await dio.put(kBaseUrl + "/public_users/actions/password",
-        data: signInParams,
+        data: userActiveParams,
         options: Options(headers: {
           HttpHeaders.acceptHeader: 'application/json',
           HttpHeaders.authorizationHeader: 'Bearer $token'
