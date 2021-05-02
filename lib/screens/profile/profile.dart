@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:public_app/Routes/Routes.dart';
 import 'package:public_app/colors/colors.dart';
 import 'package:public_app/colors/text.dart';
+import 'package:public_app/screens/profile/profile_model.dart';
+
+import '../../Services/HttpService.dart';
 
 class ProfilePage extends StatefulWidget {
   final String test;
@@ -14,6 +17,13 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  ProfileModel profileModel;
+
+  @override
+  void initState() {
+    getProfile();
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,13 +71,13 @@ class _ProfilePageState extends State<ProfilePage> {
               ProfileCard(
                 icon: Icons.phone_android_rounded,
                 title: 'Mobile Number',
-                subtitle: '+91 9191919191',
+                subtitle: profileModel?.details?.user?.phone ?? 'Unable to fetch.',
                 mono: true,
               ),
               ProfileCard(
                 icon: Icons.email,
                 title: 'Email',
-                subtitle: 'something@email.com',
+                subtitle: profileModel?.details?.user?.email ?? 'Unable to fetch.',
               ),
               InkWell(
                 onTap: () {
@@ -82,12 +92,12 @@ class _ProfilePageState extends State<ProfilePage> {
               ProfileCard(
                 icon: Icons.business,
                 title: 'Company Name',
-                subtitle: 'BleuDrat',
+                subtitle: profileModel?.details?.user?.businessName ?? 'Unable to fetch.',
               ),
               ProfileCard(
                 icon: Icons.contacts_rounded,
                 title: 'EmployeeID',
-                subtitle: '1931920320',
+                subtitle: profileModel?.details?.user?.employeeId ?? 'Unable to fetch.',
                 mono: true,
               ),
               Center(
@@ -118,6 +128,15 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       ),
     );
+  }
+
+  Future<void> getProfile() async {
+    ProfileModel result = await HttpService().getUser();
+    if(result != null) {
+      setState(() {
+        profileModel = result;
+      });
+    }
   }
 }
 

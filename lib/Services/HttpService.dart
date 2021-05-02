@@ -1,13 +1,14 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:public_app/colors/text.dart';
+import 'package:public_app/screens/profile/profile_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HttpService {
   Dio dio = new Dio();
 
-  Future<String> userSignUp(email, password, name, phone, employeeId, bussinessMan,
-      longitude, latitude) async {
+  Future<String> userSignUp(email, password, name, phone, employeeId,
+      bussinessMan, longitude, latitude) async {
     FormData signUpParams = FormData.fromMap({
       "email": email,
       "password": password,
@@ -24,6 +25,8 @@ class HttpService {
             Options(headers: {HttpHeaders.acceptHeader: 'application/json'}));
     print("userSignUp:response ${response.statusCode}");
     if (response.statusCode == 200) {
+      SharedPreferences preferences = await SharedPreferences.getInstance();
+      preferences.setString('id', response.data['details']['id']);
       return "registered";
     } else if (response.statusCode == 401) {
       return "401";
@@ -33,7 +36,6 @@ class HttpService {
   }
 
   Future<String> userSignIn(phone, password) async {
-
     final response = await dio.post(kBaseUrl + "/public_users/actions/login",
         data: {"phone": phone, "password": password},
         options:
@@ -64,14 +66,14 @@ class HttpService {
     if (response.statusCode == 200) {
       return "success";
     } else if (response.statusCode == 401) {
-
       return "401";
     } else {
       return "error";
     }
   }
 
-  Future userLocationUpdate(longitude, latitude, userId, bussinessName, token) async {
+  Future userLocationUpdate(
+      longitude, latitude, userId, bussinessName, token) async {
     FormData userLocationParams = FormData.fromMap({
       "location": {"longitude": longitude, "latitude": latitude},
       "publicUserId": userId,
@@ -106,6 +108,24 @@ class HttpService {
       // return login Page
     } else {
       // return error
+    }
+  }
+
+  Future<ProfileModel> getUser() async {
+    // /public_users/user/
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String id = preferences.getString('id');
+    final response = await dio.put("$kBaseUrl/public_users/user/$id",
+        options: Options(headers: {
+          HttpHeaders.acceptHeader: 'application/json',
+        }));
+
+    if (response.statusCode == 200) {
+      return ProfileModel.fromJson(response.data);
+    } else if (response.statusCode == 401) {
+      return null;
+    } else {
+      return null;
     }
   }
 }
