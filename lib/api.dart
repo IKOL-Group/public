@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:public_app/http/code.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'colors/text.dart';
 
 const String baseURL = 'http://192.168.0.101:3000';
 const String userID = '604a724263d642654fd8b333';
@@ -56,10 +59,14 @@ class APIMethods {
   }
 
   static Future<List> getUserInfo() async {
-    const route = '/public_users/user/$userID';
+
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String id = preferences.getString('id');
+
+    String route = '/public_users/user/$id';
     final client = HttpClient();
     client.connectionTimeout = const Duration(seconds: 4);
-    final uri = Uri.parse("$baseURL$route");
+    final uri = Uri.parse("$kBaseUrl$route");
     try {
       final request = await client.get(uri.host, uri.port, uri.path);
 

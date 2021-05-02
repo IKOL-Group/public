@@ -138,8 +138,8 @@ class Location {
     this.longitude,
   });
 
-  int latitude;
-  int longitude;
+  double latitude;
+  double longitude;
 
   factory Location.fromJson(Map<String, dynamic> json) => Location(
     latitude: json["latitude"],

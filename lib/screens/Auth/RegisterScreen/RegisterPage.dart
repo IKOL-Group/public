@@ -148,10 +148,12 @@ class _RegisterPageState extends State<RegisterPage> {
                           //Navigator.of(context).pushNamed(Routes.otpVerify, arguments: phoneController.text);
                           var permission =
                               await AndroidMethods.isLocationEnabled();
+                          print("permission $permission");
                           var result;
                           if (permission) {
                             Position position =
                                 await AndroidMethods.getUserLocation();
+                            print("position ${position}");
                             result = await HttpService().userSignUp(
                                 emailController.text,
                                 passwordController.text,
@@ -172,7 +174,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 null,
                                 null);
                           }
-
+                          print("result $result");
                           if (result == "registered") {
                             var login = await HttpService().userSignIn(
                                 phoneController.text, passwordController.text);

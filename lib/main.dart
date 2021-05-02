@@ -10,8 +10,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:maps_launcher/maps_launcher.dart';
 import 'package:public_app/screens/help.dart';
 import 'package:public_app/screens/profile/profile.dart';
+import 'package:public_app/screens/profile/profile_model.dart';
 
 import 'Routes/Routes.dart';
+import 'Services/HttpService.dart';
+import 'Services/HttpService.dart';
 
 void main() {
   runApp(MyApp());
@@ -216,6 +219,7 @@ class _ShareWidgetState extends State<ShareWidget> {
   bool _active;
   String _error;
   var _loading = false;
+  ProfileModel profileModel;
 
   // TODO ui click threshold
   Timer _debounce;
@@ -246,22 +250,21 @@ class _ShareWidgetState extends State<ShareWidget> {
       _error = null;
       _loading = true;
     });
-    final uinfo = await APIMethods.getUserInfo();
-    // increase loading time
+    profileModel = await HttpService().getUser();
+    /*// increase loading time
     // TODO do this only if request was very fast
-    await Future.delayed(Duration(milliseconds: 300));
-    var success = uinfo[0];
-    var error = uinfo[1];
+    await Future.delayed(Duration(milliseconds: 300));*/
+
     setState(() {
-      if (success) {
-        var active = uinfo[2];
+      if (profileModel != null) {
+        var active = profileModel.details.user.active ?? false;
         _active = active;
         if (!checkPermissions()) {
           return;
         }
-        updateLocationService();
+        updateLocationService(profileModel.details.user.id);
       } else {
-        _error = error;
+        _error = "User not found/ some error";
       }
       _loading = false;
     });
@@ -287,7 +290,7 @@ class _ShareWidgetState extends State<ShareWidget> {
       _loading = true;
     });
     _debounce = Timer(const Duration(milliseconds: 400), () async {
-      var _x = await APIMethods.toggleActive(!_active);
+      var _x = await HttpService().toggleActive(!_active);
       final bool success = _x[0];
       final String error = _x[1];
       setState(() {
@@ -295,13 +298,16 @@ class _ShareWidgetState extends State<ShareWidget> {
           // server returns bool `!_active` here we're toggling
           final bool active = _x[2];
           if (active == _active) {
+            print("SENTRY");
             // TODO report to sentry did not toggle
+          } else {
+            _active = active;
+            if (!checkPermissions()) {
+              return;
+            }
+            updateLocationService(profileModel.details.user.id);
           }
-          _active = active;
-          if (!checkPermissions()) {
-            return;
-          }
-          updateLocationService();
+
         } else {
           _error = error;
         }
@@ -324,13 +330,13 @@ class _ShareWidgetState extends State<ShareWidget> {
   }
 
   /// updates the state of the location service
-  void updateLocationService() {
+  void updateLocationService(String id) {
     // _active is from server which is what we need as the final state
     // so if active we need to activate
     if (_active) {
-      AndroidMethods.startSharing();
+      AndroidMethods.startSharing(id);
     } else {
-      AndroidMethods.stopSharing();
+      AndroidMethods.stopSharing(id);
     }
   }
 

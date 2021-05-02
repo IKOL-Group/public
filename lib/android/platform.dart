@@ -33,17 +33,17 @@ class AndroidMethods {
     }
   }
 
-  static Future<void> startSharing() async {
+  static Future<void> startSharing(String id) async {
     try {
-      await platform.invokeMethod("startSharing");
+      await platform.invokeMethod("startSharing", id);
     } on PlatformException catch (e) {
       print(e);
     }
   }
 
-  static Future<void> stopSharing() async {
+  static Future<void> stopSharing(String id) async {
     try {
-      await platform.invokeMethod("stopSharing");
+      await platform.invokeMethod("stopSharing", id);
     } on PlatformException catch (e) {
       print(e);
     }

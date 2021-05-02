@@ -9,6 +9,7 @@ class HttpService {
 
   Future<String> userSignUp(email, password, name, phone, employeeId,
       bussinessMan, longitude, latitude) async {
+    print("signup");
     FormData signUpParams = FormData.fromMap({
       "email": email,
       "password": password,
@@ -20,11 +21,21 @@ class HttpService {
       "extras": {"milkman": true, "bellboy": true, "filters": "gt 30"}
     });
     final response = await dio.post(kBaseUrl + "/public_users/actions/create",
-        data: signUpParams,
+        data: {
+          "email": email,
+          "password": password,
+          "name": name,
+          "phone": phone,
+          "employee_id": employeeId,
+          "business_name": bussinessMan,
+          "location": {"longitude": longitude, "latitude": latitude},
+          "extras": {"milkman": true, "bellboy": true, "filters": "gt 30"}
+        },
         options:
             Options(headers: {HttpHeaders.acceptHeader: 'application/json'}));
     print("userSignUp:response ${response.statusCode}");
-    if (response.statusCode == 200) {
+    print("userSignUp:response-data ${response.data}");
+    if (response.statusCode == 200 || response.statusCode == 201) {
       SharedPreferences preferences = await SharedPreferences.getInstance();
       preferences.setString('id', response.data['details']['id']);
       return "registered";
@@ -55,7 +66,9 @@ class HttpService {
   Future<String> userChangePassword(oldPass, newPass) async {
     /*FormData userPassParams =
         FormData.fromMap({"old": oldPass, "new": newPass});*/
-    String token = (await SharedPreferences.getInstance()).getString('token');
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String id = preferences.getString('id');
+    String token = preferences.getString('token');
     final response = await dio.put(kBaseUrl + "/public_users/actions/password",
         data: {"old": oldPass, "new": newPass},
         options: Options(headers: {
@@ -94,13 +107,17 @@ class HttpService {
     }
   }
 
-  Future userSetActive(bool value, token) async {
-    FormData userActiveParams = FormData.fromMap({"active": value});
+  Future userSetActive(bool value) async {
+    /*FormData userActiveParams = FormData.fromMap({"active": value});*/
+    print("userSetActive");
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String id = preferences.getString('id');
+    String loginToken = preferences.getString('token');
     final response = await dio.put(kBaseUrl + "/public_users/actions/password",
-        data: userActiveParams,
+        data: {"active": value},
         options: Options(headers: {
           HttpHeaders.acceptHeader: 'application/json',
-          HttpHeaders.authorizationHeader: 'Bearer $token'
+          HttpHeaders.authorizationHeader: 'Bearer $loginToken'
         }));
     if (response.statusCode == 200) {
       // return result
@@ -112,13 +129,17 @@ class HttpService {
   }
 
   Future<ProfileModel> getUser() async {
-    // /public_users/user/
+    print("getUser");
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String id = preferences.getString('id');
-    final response = await dio.put("$kBaseUrl/public_users/user/$id",
+    String token = preferences.getString('token');
+    final response = await dio.get("$kBaseUrl/public_users/user/$id",
         options: Options(headers: {
-          HttpHeaders.acceptHeader: 'application/json',
-        }));
+          HttpHeaders.contentTypeHeader: 'application/json',
+          HttpHeaders.authorizationHeader: 'Bearer $token'
+        }
+        )
+    );
 
     if (response.statusCode == 200) {
       return ProfileModel.fromJson(response.data);
@@ -126,6 +147,68 @@ class HttpService {
       return null;
     } else {
       return null;
+    }
+  }
+
+  Future<ProfileModel> getUserInfo() async {
+    print("getUserInfo");
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String id = preferences.getString('id');
+    String token = preferences.getString('token');
+    print("id: $id - token:$token");
+
+    final response = await dio.get("$kBaseUrl/public_users/user/$id",
+        options: Options(headers: {
+          HttpHeaders.contentTypeHeader: 'application/json',
+          HttpHeaders.authorizationHeader: 'Bearer $token'
+        }));
+
+    print("response ${response.data}");
+    print("response code ${response.statusCode}");
+    switch (response.statusCode) {
+      case HttpStatus.ok:
+        return ProfileModel.fromJson(response.data);
+        //return [true, "", response.data['details']['user']['active'] as bool];
+        break;
+      case HttpStatus.notFound:
+        return null;
+        //return [false, "User not Found"];
+        break;
+      default:
+        return null;
+        //return [false, "An error occurred on the server"];
+    }
+  }
+
+  Future<List> toggleActive(bool active) async {
+    print("toggleActive");
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String id = preferences.getString('id');
+    String token = preferences.getString('token');
+    print("id: $id - token:$token");
+
+    final response = await dio.put("$kBaseUrl/public_users/user/$id/actions/active",
+        data: {'active': active},
+        options: Options(headers: {
+          HttpHeaders.contentTypeHeader: 'application/json',
+          HttpHeaders.authorizationHeader: 'Bearer $token'
+        }));
+
+    print("response ${response.data}");
+    print("response code ${response.statusCode}");
+    switch (response.statusCode) {
+      case HttpStatus.badRequest:
+        return [false, "Bad request"];
+        break;
+      case HttpStatus.ok:
+        return [true, "", response.data['details']['active'] as bool];
+        break;
+      case HttpStatus.notFound:
+        return [false, "User not Found"];
+        break;
+      default:
+      // internal server error
+        return [false, "An error occurred on the server"];
     }
   }
 }

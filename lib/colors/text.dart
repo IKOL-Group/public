@@ -32,4 +32,4 @@ TextStyle kSubtitleTextStyleSize({double fontSize = 20, bool mono: false}) =>
           );
 
 
-const String kBaseUrl = 'http://134.209.152.67:3000';
+const String kBaseUrl = 'https://boul.in';
