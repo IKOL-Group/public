@@ -148,7 +148,8 @@ class LocationService : Service() {
 //        https://github.com/IKOL-Group/public/blob/4ffb43fa68997b36c4134753636cb09be13ccce0/android/app/src/main/kotlin/org/ikol/public_app/LocationUpdateService.kt#L53
         val thread = Thread {
             try {
-                val baseURL = "http://192.168.0.101:3000"
+                //val baseURL = "http://192.168.0.101:3000"
+                val baseURL = "https://boul.in";
                 val mURL = URL("$baseURL/location/public/actions/update")
 
                 with(mURL.openConnection() as HttpURLConnection) {
