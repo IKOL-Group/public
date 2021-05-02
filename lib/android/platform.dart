@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
 
 class AndroidMethods {
   static const platform = const MethodChannel('org.ikol.public_app/share');
@@ -46,5 +47,13 @@ class AndroidMethods {
     } on PlatformException catch (e) {
       print(e);
     }
+  }
+
+  static Future<Position> getUserLocation() async {
+    final geoPosition = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+
+    print(geoPosition.latitude);
+    print(geoPosition.longitude);
+    return geoPosition;
   }
 }

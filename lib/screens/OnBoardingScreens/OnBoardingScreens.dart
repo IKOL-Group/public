@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:public_app/Routes/Routes.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OnBoardingScreen extends StatefulWidget {
   @override
@@ -31,11 +32,27 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   }
 
   Future<void> timer() async {
-    Timer(Duration(seconds: 2), () {
-      //It will redirect  after 2 seconds
-      Navigator.of(context).pushNamedAndRemoveUntil(
-          Routes.authValidation, (route) => false,
-          arguments: null);
+    Timer(Duration(seconds: 2), () async {
+
+      SharedPreferences preferences = await SharedPreferences.getInstance();
+      try {
+        String token = preferences.getString('token');
+        print("token ${token}");
+        if (token != null) {
+          Navigator.of(context).pushNamedAndRemoveUntil(
+              Routes.home, (route) => false,);
+        } else {
+          Navigator.of(context).pushNamedAndRemoveUntil(
+              Routes.authValidation, (route) => false,
+              arguments: null);
+        }
+      } catch (e) {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+            Routes.authValidation, (route) => false,
+            arguments: null);
+      }
+
+
     });
   }
 }

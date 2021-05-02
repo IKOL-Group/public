@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:public_app/colors/text.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HttpService {
   Dio dio = new Dio();
-  Future userSignUp(email, password, name, phone, employeeId, bussinessMan,
+
+  Future<String> userSignUp(email, password, name, phone, employeeId, bussinessMan,
       longitude, latitude) async {
     FormData signUpParams = FormData.fromMap({
       "email": email,
@@ -20,46 +22,52 @@ class HttpService {
         data: signUpParams,
         options:
             Options(headers: {HttpHeaders.acceptHeader: 'application/json'}));
+    print("userSignUp:response ${response.statusCode}");
     if (response.statusCode == 200) {
-      // return result
+      return "registered";
     } else if (response.statusCode == 401) {
-      // return login Page
+      return "401";
     } else {
-      // return error
+      return "error";
     }
   }
 
-  Future userSignIn(phone, password, token) async {
-    FormData signInParams =
-        FormData.fromMap({"phone": phone, "password": password});
+  Future<String> userSignIn(phone, password) async {
+
     final response = await dio.post(kBaseUrl + "/public_users/actions/login",
-        data: signInParams,
+        data: {"phone": phone, "password": password},
         options:
             Options(headers: {HttpHeaders.acceptHeader: 'application/json'}));
+    print("userSignIn:response ${response.statusCode}");
     if (response.statusCode == 200) {
-      // return result
+      SharedPreferences preferences = await SharedPreferences.getInstance();
+      preferences.setString('token', response.data['token']);
+      return response.data['token'];
     } else if (response.statusCode == 401) {
-      // return login Page
+      return "401";
     } else {
-      // return error
+      return "error";
     }
   }
 
-  Future userChangePassword(oldPass, newPass, token) async {
-    FormData userPassParams =
-        FormData.fromMap({"old": oldPass, "new": newPass});
+  Future<String> userChangePassword(oldPass, newPass) async {
+    /*FormData userPassParams =
+        FormData.fromMap({"old": oldPass, "new": newPass});*/
+    String token = (await SharedPreferences.getInstance()).getString('token');
     final response = await dio.put(kBaseUrl + "/public_users/actions/password",
-        data: userPassParams,
+        data: {"old": oldPass, "new": newPass},
         options: Options(headers: {
           HttpHeaders.acceptHeader: 'application/json',
           HttpHeaders.authorizationHeader: 'Bearer $token'
         }));
+    print("response ${response.data}");
     if (response.statusCode == 200) {
-      // return result
+      return "success";
     } else if (response.statusCode == 401) {
-      // return login Page
+
+      return "401";
     } else {
-      // return error
+      return "error";
     }
   }
 

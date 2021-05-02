@@ -17,7 +17,8 @@ dependencies:
   maps_launcher: ^1.2.2+2
   pin_code_fields: ^7.0.0
   geolocator: 6.2.1
-  dio: 
+  dio:
+  shared_preferences: ^2.0.5
 
 dev_dependencies:
   flutter_test:

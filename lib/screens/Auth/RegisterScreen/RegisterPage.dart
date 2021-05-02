@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:public_app/Customs/CustomTextFormField2.dart';
 import 'package:public_app/Routes/Routes.dart';
 import 'package:public_app/colors/colors.dart';
 import 'package:public_app/colors/text.dart';
 import 'package:public_app/screens/Auth/RegisterScreen/OTPVerification.dart';
+
+import '../../../Services/HttpService.dart';
+import '../../../Services/HttpService.dart';
+import '../../../android/platform.dart';
+import '../../../android/platform.dart';
 
 class RegisterPage extends StatefulWidget {
   @override
@@ -14,8 +20,10 @@ class _RegisterPageState extends State<RegisterPage> {
   bool showPassword;
   TextEditingController nameController = new TextEditingController();
   TextEditingController phoneController = new TextEditingController();
+  TextEditingController emailController = new TextEditingController();
   TextEditingController passwordController = new TextEditingController();
-  TextEditingController bussinessController = new TextEditingController();
+  TextEditingController businessController = new TextEditingController()
+    ..text = "GHMC";
   GlobalKey<FormState> registerKey = new GlobalKey();
   passwordVisibility() {
     if (showPassword == true) {
@@ -98,10 +106,21 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               new CustomTextFormFeild2(
                 validator: validateFields,
+                keyboardType: TextInputType.emailAddress,
+                fieldController: emailController,
+                maxLength: 10,
                 readOnly: false,
                 obscureText: false,
-                hintName: 'Bussiness Type',
-                fieldController: bussinessController,
+                hintName: 'Enter Email',
+                icon: Icons.email_outlined,
+                maxLines: 1,
+              ),
+              new CustomTextFormFeild2(
+                validator: validateFields,
+                readOnly: true,
+                obscureText: false,
+                hintName: 'Business Type',
+                fieldController: businessController,
                 icon: Icons.business,
                 maxLines: 1,
               ),
@@ -124,9 +143,57 @@ class _RegisterPageState extends State<RegisterPage> {
                               borderRadius: BorderRadius.circular(18.0),
                             ),
                           )),
-                      onPressed: () {
+                      onPressed: () async {
                         if (registerKey.currentState.validate()) {
-                          Navigator.of(context).pushNamed(Routes.otpVerify, arguments: phoneController.text);
+                          //Navigator.of(context).pushNamed(Routes.otpVerify, arguments: phoneController.text);
+                          var permission =
+                              await AndroidMethods.isLocationEnabled();
+                          var result;
+                          if (permission) {
+                            Position position =
+                                await AndroidMethods.getUserLocation();
+                            result = await HttpService().userSignUp(
+                                emailController.text,
+                                passwordController.text,
+                                nameController.text,
+                                phoneController.text,
+                                '',
+                                businessController.text,
+                                position.longitude,
+                                position.latitude);
+                          } else {
+                            result = await HttpService().userSignUp(
+                                emailController.text,
+                                passwordController.text,
+                                nameController.text,
+                                phoneController.text,
+                                '',
+                                businessController.text,
+                                null,
+                                null);
+                          }
+
+                          if (result == "registered") {
+                            var login = await HttpService().userSignIn(
+                                phoneController.text, passwordController.text);
+                            if (login == "401") {
+                              //TODO error message
+                            } else if (login == "error") {
+                              //TODO error message
+                            } else {
+                              Navigator.of(context).pushNamedAndRemoveUntil(
+                                  Routes.home, (route) {
+                                if (route.settings.name == '/') {
+                                  return true;
+                                }
+                                return false;
+                              });
+                            }
+                          } else if (result == "401") {
+                            //TODO error message
+                          } else {
+                            //TODO error message
+                          }
                         }
                       },
                       child: Text('Send OTP', style: kPoppinsTextStyle3)),

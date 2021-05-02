@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:public_app/Customs/CustomTextFormField2.dart';
 import 'package:public_app/colors/colors.dart';
 import 'package:public_app/colors/text.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../Services/HttpService.dart';
 
 class ChangePassword extends StatefulWidget {
   @override
@@ -16,6 +19,8 @@ class _ChangePasswordState extends State<ChangePassword> {
   bool newPassword;
   bool confirmPassword;
 
+  GlobalKey<FormState> passKey = new GlobalKey();
+
   @override
   void initState() {
     currentPassword = true;
@@ -27,18 +32,6 @@ class _ChangePasswordState extends State<ChangePassword> {
   @override
   void dispose() {
     super.dispose();
-  }
-
-  passwordVisibility() {
-    if (currentPassword = true) {
-      setState(() {
-        currentPassword = false;
-      });
-    } else {
-      setState(() {
-        currentPassword = true;
-      });
-    }
   }
 
   @override
@@ -57,70 +50,114 @@ class _ChangePasswordState extends State<ChangePassword> {
       ),
       body: Padding(
         padding: const EdgeInsets.only(right: 20.0),
-        child: Column(
-          children: [
-            new CustomTextFormFeild2(
-                labelName: 'Current Password',
-                suffix: InkWell(
-                    child: Icon(!currentPassword
-                        ? Icons.visibility
-                        : Icons.visibility_off),
-                    onTap: passwordVisibility),
-                fieldController: currentPasswordController,
-                readOnly: false,
-                obscureText: currentPassword,
-                maxLines: 1),
-            new CustomTextFormFeild2(
-                labelName: 'New Password',
-                suffix: InkWell(
-                    child: Icon(
-                        !newPassword ? Icons.visibility : Icons.visibility_off),
-                    onTap: () {
-                      passwordVisibility();
-                    }),
-                fieldController: newPasswordController,
-                readOnly: false,
-                obscureText: newPassword,
-                maxLines: 1),
-            new CustomTextFormFeild2(
+        child: Form(
+          key: passKey,
+          autovalidateMode: AutovalidateMode.disabled,
+          child: Column(
+            children: [
+              new CustomTextFormFeild2(
+                  labelName: 'Current Password',
+                  suffix: InkWell(
+                      child: Icon(!currentPassword
+                          ? Icons.visibility
+                          : Icons.visibility_off),
+                      onTap: () {
+                        setState(() {
+                          currentPassword = !currentPassword;
+                        });
+                      }),
+                  fieldController: currentPasswordController,
+                  readOnly: false,
+                  obscureText: currentPassword,
+                  maxLines: 1),
+              new CustomTextFormFeild2(
+                  labelName: 'New Password',
+                  suffix: InkWell(
+                      child: Icon(!newPassword
+                          ? Icons.visibility
+                          : Icons.visibility_off),
+                      onTap: () {
+                        setState(() {
+                          newPassword = !newPassword;
+                        });
+                      }),
+                  fieldController: newPasswordController,
+                  readOnly: false,
+                  obscureText: newPassword,
+                  maxLines: 1),
+              new CustomTextFormFeild2(
+                validator: validateConfirmPassword,
                 labelName: 'Confirm Password',
                 suffix: InkWell(
-                    child: Icon(!confirmPassword
-                        ? Icons.visibility
-                        : Icons.visibility_off),
-                    onTap: () {
-                      passwordVisibility();
-                    }),
+                  child: Icon(confirmPassword
+                      ? Icons.visibility_off
+                      : Icons.visibility),
+                  onTap: () {
+                    setState(() {
+                      confirmPassword = !confirmPassword;
+                    });
+                  },
+                ),
                 fieldController: confirmPasswordController,
                 readOnly: false,
                 obscureText: confirmPassword,
-                maxLines: 1),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10.0),
-              child: ElevatedButton(
-                  style: ButtonStyle(
-                      padding: MaterialStateProperty.all(EdgeInsets.symmetric(
-                          vertical: 2.0, horizontal: 30.0)),
-                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                          (Set<MaterialState> state) {
-                        return kGreenColor;
-                      }),
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18.0),
-                        ),
-                      )),
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ChangePassword()));
-                  },
-                  child: Text('Update Password', style: kPoppinsTextStyle3)),
-            ),
-          ],
+                maxLines: 1,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10.0),
+                child: ElevatedButton(
+                    style: ButtonStyle(
+                        padding: MaterialStateProperty.all(EdgeInsets.symmetric(
+                            vertical: 2.0, horizontal: 30.0)),
+                        backgroundColor:
+                            MaterialStateProperty.resolveWith<Color>(
+                                (Set<MaterialState> state) {
+                          return kGreenColor;
+                        }),
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18.0),
+                          ),
+                        )),
+                    onPressed: () async {
+                      if (passKey.currentState.validate()) {
+                        print("valid");
+                        String result = await HttpService().userChangePassword(
+                          currentPasswordController.text,
+                          newPasswordController.text,
+                        );
+                        if (result == 'success') {
+                          Navigator.of(context).pop();
+                        } else if (result == '401') {
+                          //TODO error message
+                        } else {
+                          //TODO error message
+                        }
+                      } else {
+                        print("in-valid");
+                        //TODO show error message
+                      }
+
+                      /*Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ChangePassword()));*/
+                    },
+                    child: Text('Update Password', style: kPoppinsTextStyle3)),
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  String validateConfirmPassword(String value) {
+    if (value == newPasswordController.text) {
+      return null;
+    } else {
+      return "Password does not match";
+    }
   }
 }

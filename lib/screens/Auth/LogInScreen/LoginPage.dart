@@ -4,6 +4,8 @@ import 'package:public_app/Routes/Routes.dart';
 import 'package:public_app/colors/colors.dart';
 import 'package:public_app/colors/text.dart';
 
+import '../../../Services/HttpService.dart';
+
 class LoginPage extends StatefulWidget {
   LoginPage({Key key}) : super(key: key);
 
@@ -130,9 +132,26 @@ class _LoginPageState extends State<LoginPage> {
                             borderRadius: BorderRadius.circular(18.0),
                           ),
                         )),
-                    onPressed: () {
+                    onPressed: () async {
                       if (logInKey.currentState.validate()) {
-                        Navigator.of(context).pushNamed(Routes.home);
+                        print("validated");
+                        var login = await HttpService().userSignIn(
+                            phoneController.text, passwordController.text);
+                        if (login == "401") {
+                          //TODO error message
+                        } else if (login == "error") {
+                          //TODO error message
+                        } else {
+                          Navigator.of(context).pushNamedAndRemoveUntil(
+                              Routes.home, (route) {
+                            if (route.settings.name == '/') {
+                              return true;
+                            }
+                            return false;
+                          });
+                        }
+                      } else {
+                        print("not validated");
                       }
                     },
                     child: Text('LOG IN', style: kPoppinsTextStyle3)),
