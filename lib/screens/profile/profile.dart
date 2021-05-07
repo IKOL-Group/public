@@ -120,7 +120,19 @@ class _ProfilePageState extends State<ProfilePage> {
                               borderRadius: BorderRadius.circular(18.0),
                             ),
                           )),
-                      onPressed: () {},
+                      onPressed: () async {
+                        bool res = await HttpService().logOut();
+                        if(res) {
+                          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) {
+                            if(route.settings.name == '/') {
+                              return true;
+                            }
+                            return false;
+                          });
+                        } else {
+
+                        }
+                      },
                       child: Text('LogOut', style: kPoppinsTextStyle3)),
                 ),
               ),

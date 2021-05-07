@@ -202,4 +202,10 @@ class HttpService {
         return [false, "An error occurred on the server"];
     }
   }
+
+  Future<bool> logOut() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    return preferences.clear();
+
+  }
 }
