@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
+import android.content.LocusId
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.ActivityCompat
@@ -16,6 +17,7 @@ import org.ikol.public_app.util.Util
 class LocationHelper(private var mActivity: Activity, base: Context) : ContextWrapper(base) {
     private var mLocationService: LocationService = LocationService()
     private lateinit var mServiceIntent: Intent
+    private lateinit var id: String
 
     fun isLocationEnabled(): Boolean {
         return Util.isLocationEnabledOrNot(mActivity)
@@ -50,8 +52,10 @@ class LocationHelper(private var mActivity: Activity, base: Context) : ContextWr
         }
     }
 
-    fun startSharing() {
+    fun startSharing(userId: String) {
+        id = userId
         mServiceIntent = Intent(this, mLocationService::class.java)
+        mServiceIntent.putExtra("id",userId);
         if (!Util.isMyServiceRunning(mLocationService::class.java, mActivity)) {
             startService(mServiceIntent)
         }

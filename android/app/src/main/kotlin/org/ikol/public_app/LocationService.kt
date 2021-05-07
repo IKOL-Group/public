@@ -42,11 +42,13 @@ data class UpdateEvent(val location: Location2, val publicUserID: String, val bu
 class LocationService : Service() {
     var latitude: Double = 0.0
     var longitude: Double = 0.0
+    lateinit var userId: String
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
 
     override fun onCreate() {
         super.onCreate()
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChanel()
@@ -114,6 +116,7 @@ class LocationService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        userId = intent?.getStringExtra("id") ?: "604a724263d642654fd8b333";
         super.onStartCommand(intent, flags, startId)
         Log.d(TAG, intent?.action.toString())
         return START_STICKY
@@ -154,8 +157,8 @@ class LocationService : Service() {
 
                 with(mURL.openConnection() as HttpURLConnection) {
                     requestMethod = "PUT"
-
-                    val event = UpdateEvent(Location2(latitude, longitude), "604a724263d642654fd8b333", "DeliveryBoyz")
+                    println("userIDD "+userId)
+                    val event = UpdateEvent(Location2(latitude, longitude), userId, "DeliveryBoyz")
                     val message = Json.encodeToString(event)
                     println(message)
 

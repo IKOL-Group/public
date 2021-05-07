@@ -34,7 +34,8 @@ class MainActivity : FlutterActivity() {
                     result.success(mLocationHelper.isLocationEnabled())
                 }
                 "startSharing" -> {
-                    mLocationHelper.startSharing()
+                    val userId = call.argument<String>("id")  as String
+                    mLocationHelper.startSharing(userId)
                 }
                 "stopSharing" -> {
                     mLocationHelper.stopSharing()
