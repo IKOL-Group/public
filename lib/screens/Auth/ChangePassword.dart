@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:public_app/Customs/CustomTextFormField2.dart';
 import 'package:public_app/colors/colors.dart';
 import 'package:public_app/colors/text.dart';
@@ -130,13 +131,13 @@ class _ChangePasswordState extends State<ChangePassword> {
                         if (result == 'success') {
                           Navigator.of(context).pop();
                         } else if (result == '401') {
-                          //TODO error message
+                          Fluttertoast.showToast(msg: "401 Error. Unable to change password.");
                         } else {
-                          //TODO error message
+                          Fluttertoast.showToast(msg: "Unknown Error. Unable to change password.");
                         }
                       } else {
                         print("in-valid");
-                        //TODO show error message
+                        Fluttertoast.showToast(msg: "Fill the form correctly.");
                       }
 
                       /*Navigator.push(

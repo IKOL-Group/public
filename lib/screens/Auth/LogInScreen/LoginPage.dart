@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:public_app/Customs/CustomTextFormField.dart';
 import 'package:public_app/Routes/Routes.dart';
 import 'package:public_app/colors/colors.dart';
@@ -138,9 +139,10 @@ class _LoginPageState extends State<LoginPage> {
                         var login = await HttpService().userSignIn(
                             phoneController.text, passwordController.text);
                         if (login == "401") {
-                          //TODO error message
+                          Fluttertoast.showToast(msg: "401 Error while Log in.");
+
                         } else if (login == "error") {
-                          //TODO error message
+                          Fluttertoast.showToast(msg: "Unknown Error while Log in.");
                         } else {
                           Navigator.of(context).pushNamedAndRemoveUntil(
                               Routes.home, (route) {

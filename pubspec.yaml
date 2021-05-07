@@ -19,6 +19,7 @@ dependencies:
   geolocator: 6.2.1
   dio:
   shared_preferences: ^2.0.5
+  fluttertoast:
 
 dev_dependencies:
   flutter_test:

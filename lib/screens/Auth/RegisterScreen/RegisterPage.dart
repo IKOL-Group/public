@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:public_app/Customs/CustomTextFormField2.dart';
 import 'package:public_app/Routes/Routes.dart';
@@ -179,9 +180,9 @@ class _RegisterPageState extends State<RegisterPage> {
                             var login = await HttpService().userSignIn(
                                 phoneController.text, passwordController.text);
                             if (login == "401") {
-                              //TODO error message
+                              Fluttertoast.showToast(msg: "401 Error while Log in.");
                             } else if (login == "error") {
-                              //TODO error message
+                              Fluttertoast.showToast(msg: "Unknown Error while Log in.");
                             } else {
                               Navigator.of(context).pushNamedAndRemoveUntil(
                                   Routes.home, (route) {
@@ -192,9 +193,9 @@ class _RegisterPageState extends State<RegisterPage> {
                               });
                             }
                           } else if (result == "401") {
-                            //TODO error message
+                            Fluttertoast.showToast(msg: "401 Error while registering.");
                           } else {
-                            //TODO error message
+                            Fluttertoast.showToast(msg: "Unknown Error while registering.");
                           }
                         }
                       },

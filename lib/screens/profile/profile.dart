@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:public_app/Routes/Routes.dart';
 import 'package:public_app/colors/colors.dart';
 import 'package:public_app/colors/text.dart';
@@ -136,6 +137,8 @@ class _ProfilePageState extends State<ProfilePage> {
       setState(() {
         profileModel = result;
       });
+    } else {
+      Fluttertoast.showToast(msg: "Unable to find user. Log out and retry");
     }
   }
 }

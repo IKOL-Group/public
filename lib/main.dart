@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:public_app/android/platform.dart';
 import 'package:public_app/api.dart';
@@ -264,6 +265,7 @@ class _ShareWidgetState extends State<ShareWidget> {
         }
         updateLocationService(profileModel.details.user.id);
       } else {
+        Fluttertoast.showToast(msg: "Unable to find user. Log out and retry");
         _error = "User not found/ some error";
       }
       _loading = false;
@@ -309,6 +311,7 @@ class _ShareWidgetState extends State<ShareWidget> {
           }
 
         } else {
+          Fluttertoast.showToast(msg: "Unable to start/stop share location.");
           _error = error;
         }
         // we're not loading anymore

@@ -10,16 +10,7 @@ class HttpService {
   Future<String> userSignUp(email, password, name, phone, employeeId,
       bussinessMan, longitude, latitude) async {
     print("signup");
-    FormData signUpParams = FormData.fromMap({
-      "email": email,
-      "password": password,
-      "name": name,
-      "phone": phone,
-      "employee_id": employeeId,
-      "business_name": bussinessMan,
-      "location": {"longitude": longitude, "latitude": latitude},
-      "extras": {"milkman": true, "bellboy": true, "filters": "gt 30"}
-    });
+
     final response = await dio.post(kBaseUrl + "/public_users/actions/create",
         data: {
           "email": email,
