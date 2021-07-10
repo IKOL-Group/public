@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:public_app/colors/text.dart';
 import 'package:public_app/screens/profile/profile_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class HttpService {
   Dio dio = new Dio();
@@ -58,7 +59,6 @@ class HttpService {
     /*FormData userPassParams =
         FormData.fromMap({"old": oldPass, "new": newPass});*/
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    String id = preferences.getString('id');
     String token = preferences.getString('token');
     final response = await dio.put(kBaseUrl + "/public_users/actions/password",
         data: {"old": oldPass, "new": newPass},
@@ -102,7 +102,6 @@ class HttpService {
     /*FormData userActiveParams = FormData.fromMap({"active": value});*/
     print("userSetActive");
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    String id = preferences.getString('id');
     String loginToken = preferences.getString('token');
     final response = await dio.put(kBaseUrl + "/public_users/actions/password",
         data: {"active": value},
@@ -122,8 +121,11 @@ class HttpService {
   Future<ProfileModel> getUser() async {
     print("getUser");
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    String id = preferences.getString('id');
     String token = preferences.getString('token');
+    if(token == null) return null;
+    Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+    String id = decodedToken['id'] ?? '';
+    if(id == '') return null;
     final response = await dio.get("$kBaseUrl/public_users/user/$id",
         options: Options(headers: {
           HttpHeaders.contentTypeHeader: 'application/json',
@@ -144,8 +146,11 @@ class HttpService {
   Future<ProfileModel> getUserInfo() async {
     print("getUserInfo");
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    String id = preferences.getString('id');
     String token = preferences.getString('token');
+    if(token == null) return null;
+    Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+    String id = decodedToken['id'] ?? '';
+    if(id == '') return null;
     print("id: $id - token:$token");
 
     final response = await dio.get("$kBaseUrl/public_users/user/$id",
@@ -174,8 +179,11 @@ class HttpService {
   Future<List> toggleActive(bool active) async {
     print("toggleActive");
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    String id = preferences.getString('id');
     String token = preferences.getString('token');
+    if(token == null) return null;
+    Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+    String id = decodedToken['id'] ?? '';
+    if(id == '') return null;
     print("id: $id - token:$token");
 
     final response = await dio.put("$kBaseUrl/public_users/user/$id/actions/active",
